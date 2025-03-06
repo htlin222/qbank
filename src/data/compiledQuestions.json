@@ -1,7 +1,7 @@
 [
   {
     "id": 69,
-    "question": "關於 BRCA1/2 mutation，以下敘述中，正確的有?\n(1) 具有 germline mutation 的女性，有顯著較高罹患乳癌及卵巢癌風險。\n(2) 預防性卵巢切除，可以減少罹患乳癌的機率。\n(3) 轉移性乳癌，使用 PARP 抑制劑，除了有較佳的無疾病惡化存活期之外，其整體存活\n期(overall survival)也顯著高於單一化學治療，應優先使用。\n(4) 化療藥品中，鉑金類(platinum)效果相對較佳。",
+    "question": "關於 BRCA1/2 mutation，以下敘述中，正確的有?\n(1) 具有 germline mutation 的女性，有顯著較高罹患乳癌及卵巢癌風險。\n(2) 預防性卵巢切除，可以減少罹患乳癌的機率。\n(3) 轉移性乳癌，使用 PARP 抑制劑，除了有較佳的無疾病惡化存活期之外，其整體存活期(overall survival)也顯著高於單一化學治療，應優先使用。\n(4) 化療藥品中，鉑金類(platinum)效果相對較佳。",
     "options": [
       "(1),(2),(3)",
       "(1),(3)",
@@ -36,7 +36,7 @@
   },
   {
     "id": 71,
-    "question": "有關 HER2 陽性(HER2 overexpression)轉移性乳癌，以下敘述中，正確的有？\n(1) 目前第一線治療建議的是 trastuzumab+pertuzumab 合併紫杉醇。\n(2) 第二線的治療，研究顯示，新一代的 antibody-drug conjugate TDXd (trastuzumab\nderuxtecan)，效果顯著的優於 TDM1 (trastuzuamb emtansine)。\n(3) Trastuzumab+pertuzumab 合併紫杉醇治療後，產生抗藥性，疾病惡化進展時，更換成\n下一線的化療藥物時，繼續持續使用 tratuzumab 被證實仍然會加強下一線化療的療效。\n(4) 口服 anti-HER2 標靶藥物 lapatinib 合併 capecitabine，是常用的第三，四線藥物，但是 對於腦轉移的患者不建議使用。",
+    "question": "有關 HER2 陽性(HER2 overexpression)轉移性乳癌，以下敘述中，正確的有？\n(1) 目前第一線治療建議的是 trastuzumab+pertuzumab 合併紫杉醇。\n(2) 第二線的治療，研究顯示，新一代的 antibody-drug conjugate TDXd (trastuzumab deruxtecan)，效果顯著的優於 TDM1 (trastuzuamb emtansine)。\n(3) Trastuzumab+pertuzumab 合併紫杉醇治療後，產生抗藥性，疾病惡化進展時，更換成下一線的化療藥物時，繼續持續使用 tratuzumab 被證實仍然會加強下一線化療的療效。\n(4) 口服 anti-HER2 標靶藥物 lapatinib 合併 capecitabine，是常用的第三，四線藥物，但是對於腦轉移的患者不建議使用。",
     "options": [
       "(1),(2),(3)",
       "(1),(3)",
@@ -51,7 +51,7 @@
   },
   {
     "id": 72,
-    "question": "有關侵犯性乳癌手術後的輔助性放射治療，以下敘述中，正確的有？\n(1) 若是乳房保留手術之後，建議應該實施。\n(2) 若是腋下淋巴結四顆陽性，建議應該實施。\n(3) 若是病人有接受適當的全身性輔助性治療(systemic adjuvant therapy)，臨床上理學檢查未發現\n  有淋巴結腫大，腋下前哨淋巴結取樣只有一顆陽性，放射治療可以取代腋下淋巴結廓清術。\n(4) 若有其他高風險因子存在，腋下淋巴結只有 1 顆陽性，也建議實施。",
+    "question": "有關侵犯性乳癌手術後的輔助性放射治療，以下敘述中，正確的有？\n(1) 若是乳房保留手術之後，建議應該實施。\n(2) 若是腋下淋巴結四顆陽性，建議應該實施。\n(3) 若是病人有接受適當的全身性輔助性治療(systemic adjuvant therapy)，臨床上理學檢查未發現有淋巴結腫大，腋下前哨淋巴結取樣只有一顆陽性，放射治療可以取代腋下淋巴結廓清術。\n(4) 若有其他高風險因子存在，腋下淋巴結只有 1 顆陽性，也建議實施。",
     "options": [
       "(1),(2),(3)",
       "(1),(3)",
