@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { QuizQuestion } from '@/components/quiz/QuizQuestion';
@@ -43,12 +43,41 @@ const OncoQuiz = () => {
   const [score, setScore] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [isProgressSaved, setIsProgressSaved] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Current question data
   const currentQuestion = compiledQuestions[currentQuestionIndex];
   const totalQuestions = compiledQuestions.length;
+
+  // Set up beforeunload event handler to warn when closing without saving
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isProgressSaved && isStarted && !isCompleted) {
+        // Standard way to show a confirmation dialog before closing
+        e.preventDefault();
+        // Chrome requires returnValue to be set
+        e.returnValue = '';
+        // Message is typically ignored by modern browsers for security reasons
+        // but we set it for older browsers
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isProgressSaved, isStarted, isCompleted]);
+
+  // Mark progress as unsaved when answers change
+  useEffect(() => {
+    if (isStarted && !isCompleted && Object.keys(userAnswers).length > 0) {
+      setIsProgressSaved(false);
+    }
+  }, [userAnswers, isStarted, isCompleted]);
 
   // Handler for toggling star status
   const handleToggleStar = (questionId: number) => {
@@ -71,6 +100,9 @@ const OncoQuiz = () => {
       ...questionStatus,
       [currentQuestion.id]: 'answered'
     });
+    
+    // Mark progress as unsaved when an answer is selected
+    setIsProgressSaved(false);
   };
 
   // Handler for checking answer
@@ -122,6 +154,8 @@ const OncoQuiz = () => {
     // Clear localStorage since quiz is completed
     localStorage.removeItem('quizProgress');
     setShowFinishDialog(false);
+    // Mark progress as saved since quiz is completed
+    setIsProgressSaved(true);
   };
 
   // Navigate to previous question
@@ -203,6 +237,9 @@ const OncoQuiz = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    // Mark progress as saved after saving
+    setIsProgressSaved(true);
   };
 
   // Load progress
@@ -225,6 +262,8 @@ const OncoQuiz = () => {
         setStarredQuestions(progress.starredQuestions || []);
         // Save loaded progress to localStorage
         localStorage.setItem('quizProgress', JSON.stringify(progress));
+        // Mark progress as saved after loading
+        setIsProgressSaved(true);
       } catch (error) {
         console.error('Error loading progress:', error);
       }
@@ -253,6 +292,8 @@ const OncoQuiz = () => {
     setShowFinishDialog(false);
     // Clear localStorage
     localStorage.removeItem('quizProgress');
+    // Mark progress as saved after exiting
+    setIsProgressSaved(true);
   };
 
   // Calculate progress percentage
