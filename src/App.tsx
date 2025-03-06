@@ -59,12 +59,6 @@ const OncoQuiz = () => {
     );
   };
 
-  // Handler for starting the quiz
-  const handleStart = (mode: QuizMode) => {
-    setQuizMode(mode);
-    setIsStarted(true);
-  };
-
   // Handler for selecting an answer
   const handleAnswerSelect = (value: string) => {
     const answerValue = parseInt(value);
@@ -119,7 +113,6 @@ const OncoQuiz = () => {
 
   // Finish quiz and calculate final score
   const finishQuiz = () => {
-    const answeredQuestions = Object.keys(userAnswers).length;
     const correctAnswers = compiledQuestions.reduce((count, question) => {
       return userAnswers[question.id] === question.correctAnswer ? count + 1 : count;
     }, 0);
@@ -181,7 +174,7 @@ const OncoQuiz = () => {
 
     // Format date in Taipei timezone for filename
     const now = new Date();
-    const taipeiOptions = { 
+    const taipeiOptions: Intl.DateTimeFormatOptions = { 
       timeZone: 'Asia/Taipei',
       year: 'numeric',
       month: '2-digit',
@@ -302,14 +295,9 @@ const OncoQuiz = () => {
       score={score}
       totalQuestions={totalQuestions}
       onRestart={handleRestart}
+      mode={quizMode}
     />;
   }
-
-  // Overview data
-  const overviewData = compiledQuestions.map(q => ({
-    id: q.id,
-    status: questionStatus[q.id]
-  }));
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -319,7 +307,7 @@ const OncoQuiz = () => {
             <h1 className="text-2xl font-bold text-blue-800">Oncology Review Quiz</h1>
             <div className="flex gap-4">
               <QuizOverview
-                questions={compiledQuestions.map((q, index) => ({
+                questions={compiledQuestions.map(q => ({
                   id: q.id,
                   status: questionStatus[q.id]
                 }))}
@@ -355,6 +343,7 @@ const OncoQuiz = () => {
           score={score}
           totalQuestions={totalQuestions}
           onRestart={handleRestart}
+          mode={quizMode}
         />
       )}
 

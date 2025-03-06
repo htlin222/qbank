@@ -118,6 +118,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                   
                   // In test mode, only show answers after completion
                   const showAnswer = mode === 'study' || showResults;
+                  const isAnswered = userAnswers[question.id] !== undefined;
                   const buttonStyle = !showAnswer
                     ? isAnswered ? "text-blue-600" : ""
                     : isWrong ? "text-red-600" : "text-green-600";

@@ -2,7 +2,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle, CircleDashed, SkipForward, Menu, Star } from 'lucide-react';
+import { CheckCircle, CircleDashed, SkipForward, Menu } from 'lucide-react';
 
 interface QuizOverviewProps {
   questions: Array<{
