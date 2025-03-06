@@ -15,7 +15,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
     <div className="max-w-3xl mx-auto">
       <Card className="w-full">
         <CardHeader className="bg-blue-600 text-white text-center pb-6">
-          <CardTitle className="text-3xl">Welcome to Oncology Review Quiz</CardTitle>
+          <CardTitle className="text-3xl">113年度腫專考古題</CardTitle>
         </CardHeader>
         <CardContent className="pt-6 pb-4">
           <div className="flex flex-col items-center space-y-6">
