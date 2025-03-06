@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
 interface SingleQuestionWithExplainProps {
@@ -54,14 +54,36 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
           {/* Question Figures */}
           {question.questionFigures.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {question.questionFigures.map((figure, index) => (
-                <img 
-                  key={index}
-                  src={figure}
-                  alt={`Question figure ${index + 1}`}
-                  className="max-w-full rounded-lg shadow-md"
-                />
-              ))}
+              {question.questionFigures.map((figure, index) => {
+                const figureName = figure.split('/').pop()?.split('.')[0] || `Question Figure ${index + 1}`;
+                return (
+                  <Dialog key={index}>
+                    <DialogTrigger asChild>
+                      <img 
+                        src={figure}
+                        alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                        title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                        className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-center">
+                          {`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                        </DialogTitle>
+                        <DialogDescription className="text-center text-gray-600">
+                          Click anywhere outside to close the image
+                        </DialogDescription>
+                      </DialogHeader>
+                      <img 
+                        src={figure}
+                        alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                        className="w-auto max-w-full max-h-[80vh] mx-auto"
+                      />
+                    </DialogContent>
+                  </Dialog>
+                );
+              })}
             </div>
           )}
 
@@ -130,17 +152,36 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
               {question.explainFigures.length > 0 && (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {question.explainFigures.map((figure, index) => {
-                    const figureName = figure.split('/').pop()?.split('.')[0] || `Figure ${index + 1}`;
+                    const figureName = figure.split('/').pop()?.split('.')[0] || `Explanation Figure ${index + 1}`;
                     return (
-                      <div key={index}>
-                        <img 
-                          src={figure}
-                          alt={figureName}
-                          title={figureName}
-                          className="max-w-full rounded-lg shadow-md"
-                        />
-                        <p className="text-center text-sm text-gray-600 mt-1">{figureName}</p>
-                      </div>
+                      <Dialog key={index}>
+                        <DialogTrigger asChild>
+                          <div>
+                            <img 
+                              src={figure}
+                              alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                              title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                              className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                            />
+                            <p className="text-center text-sm text-gray-600 mt-1">{figureName}</p>
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-center">
+                              {`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                            </DialogTitle>
+                            <DialogDescription className="text-center text-gray-600">
+                              Click anywhere outside to close the image
+                            </DialogDescription>
+                          </DialogHeader>
+                          <img 
+                            src={figure}
+                            alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                            className="w-auto max-w-full max-h-[80vh] mx-auto"
+                          />
+                        </DialogContent>
+                      </Dialog>
                     );
                   })}
                 </div>
