@@ -194,7 +194,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
                     </div>
                     {userAnswers[question.id] !== undefined && (
                       <div className="pt-2 font-medium">
-                        Selected: {String.fromCharCode(65 + parseInt(userAnswers[question.id]))}
+                        Selected: {String.fromCharCode(65 + userAnswers[question.id])}
                         {(mode === 'study' || (mode === 'test' && showExplanation[question.id])) && (
                           <span className="ml-2">
                             | Correct: {String.fromCharCode(65 + question.correctAnswer)}
