@@ -1,7 +1,0 @@
-有關 HER2 陽性(HER2 overexpression)轉移性乳癌，以下敘述中，正確的有？
-(1) 目前第一線治療建議的是 trastuzumab+pertuzumab 合併紫杉醇。
-(2) 第二線的治療，研究顯示，新一代的 antibody-drug conjugate TDXd (trastuzumab
-deruxtecan)，效果顯著的優於 TDM1 (trastuzuamb emtansine)。
-(3) Trastuzumab+pertuzumab 合併紫杉醇治療後，產生抗藥性，疾病惡化進展時，更換成
-下一線的化療藥物時，繼續持續使用 tratuzumab 被證實仍然會加強下一線化療的療效。
-(4) 口服 anti-HER2 標靶藥物 lapatinib 合併 capecitabine，是常用的第三，四線藥物，但是 對於腦轉移的患者不建議使用。
