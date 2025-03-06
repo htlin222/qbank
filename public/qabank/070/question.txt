@@ -1,0 +1,5 @@
+關於轉移性乳癌的 biomarker 及其相對應的藥物，以下 biomarker 中，不必檢驗陽性即可 使用該藥物治療的有?
+(1) PIK3CA mutation: PI3K 抑制劑 (如 alpelisib)
+(2) PI3K/akt/mTOR alteration: mTOR inhibitor (如 everolimus)
+(3) HER2 overexpression (IHC 3+ or FISH positive): trastuzumab, TDM1
+(4) Trop 2 protein expression: anti-Trop2 antibody-drug conjugate (如 sacituzumab govitecan)

@@ -1,0 +1,24 @@
+偷吃步解法：(1), (4) 必選，選(E)
+
+(1) ✓ 正確。BRCA1/2胚細胞系突變確實會顯著增加女性罹患乳癌和卵巢癌的風險。BRCA1突變者一生中罹患乳癌的風險約為65-80%，卵巢癌風險約為39-44%；BRCA2突變者乳癌風險約為45-69%，卵巢癌風險約為11-17%。
+
+Kurian AW, Gong GD, John EM, et al. Breast Cancer Risk for Noncarriers of Family-Specific BRCA1 and BRCA2 Mutations: Findings From the Breast Cancer Family Registry - PMC. Journal of Clinical Oncology. 29(34). doi:10.1200/JCO.2010.34.4440
+  
+(2) ✓ 正確。2002 NEJM發表：預防性卵巢切除術(prophylactic oophorectomy)不僅可降低卵巢癌風險，研究也顯示它可減少BRCA突變帶因者乳癌風險約50%，主要是通過降低雌激素水平的機制。
+
+Rebbeck TR. Prophylactic Oophorectomy in Carriers of BRCA1 or BRCA2 Mutations. The New England Journal of Medicine. May 23, 2002. Accessed March 6, 2025. https://www.nejm.org/doi/full/10.1056/NEJMoa012158
+
+(3) ✓ 正確，PARP抑制劑在BRCA突變的轉移性乳癌患者中提高了無疾病惡化存活期(PFS)，當年尚未證實它們在整體存活期(OS)方面有顯著優勢，但近期 OlympiAD 在2024發表中，在線使用有OS benifit，故正確。
+
+Robson ME, Im SA, Senkus E, et al. OlympiAD extended follow-up for overall survival and safety: Olaparib versus chemotherapy treatment of physician’s choice in patients with a germline BRCA mutation and HER2-negative metastatic breast cancer. European Journal of Cancer. 2023;184:39-47. doi:10.1016/j.ejca.2023.01.031
+  
+Robson M, Im SA, Senkus E, et al. Olaparib for metastatic breast cancer in patients with a germline BRCA mutation. N Engl J Med. 2017;377(6):523-533.
+
+Litton JK, Rugo HS, Ettl J, et al. Talazoparib in patients with advanced breast cancer and a germline BRCA mutation. N Engl J Med.
+2018;379(8):753-763.
+
+(4) ✓ 正確。BRCA突變的腫瘤存在DNA修復缺陷，對引起DNA損傷的藥物特別敏感。Cells with BRCA1 pathogenic variant are more sensitive to platinum-based chemotherapeutic agents, which disrupt the DNA structure。
+
+3.Fedier A, Steiner RA, Schwarz VA, Lenherr L, Haller U, Fink D. The effect of loss of BRCA1 on the sensitivity to anticancer agents in p53-deficient cells. Int J Oncol. 2003;22:1169–1173.
+
+4.Tassone P, Tagliaferri P, Perricelli A, Blotta S, Quaresima B, Martelli ML, et al. BRCA1 expression modulates chemosensitivity of BRCA1-defective HCC1937 human breast cancer cells. Br J Cancer. 2003;88:1285–1291. doi: 10.1038/sj.bjc.6600859IF: 6.4 Q1 .

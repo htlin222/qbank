@@ -1,397 +1,423 @@
-import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { Play, Pause, Upload, MoreVertical } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { QuizQuestion } from '@/components/quiz/QuizQuestion';
+import { QuizResults } from '@/components/quiz/QuizResults';
+import { QuizOverview } from '@/components/quiz/QuizOverview';
+import { WelcomePage } from '@/components/quiz/WelcomePage';
+import { Timer } from '@/components/quiz/Timer';
+import { SkipForward, Upload } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import compiledQuestions from '@/data/compiledQuestions.json';
 
-const sampleMarkdown = `# Cast
-* John Smith as Hero
-* Jane Doe as Heroine
-* Bob Wilson as Villain
+type QuestionStatus = 'unread' | 'answered' | 'skipped';
+type QuizMode = 'study' | 'test';
 
-# Crew
-* Director: James Cameron
-* Producer: Steven Spielberg
-* Writer: Christopher Nolan
+interface QuizProgress {
+  mode: QuizMode;
+  currentQuestionIndex: number;
+  userAnswers: Record<number, number>;
+  showExplanation: Record<number, boolean>;
+  questionStatus: Record<number, QuestionStatus>;
+  score: number;
+  isCompleted: boolean;
+  timestamp: string;
+}
 
-# Special Thanks
-* Coffee Machine
-* Pizza Delivery
-* Stack Overflow`;
+const OncoQuiz = () => {
+  // Quiz state
+  const [isStarted, setIsStarted] = useState(false);
+  const [quizMode, setQuizMode] = useState<QuizMode>('study');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [showExplanation, setShowExplanation] = useState<Record<number, boolean>>({});
+  const [questionStatus, setQuestionStatus] = useState<Record<number, QuestionStatus>>(() => {
+    const initial: Record<number, QuestionStatus> = {};
+    compiledQuestions.forEach(q => {
+      initial[q.id] = 'unread';
+    });
+    return initial;
+  });
+  const [score, setScore] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
 
-const CreditsRoll = () => {
-  const [markdown, setMarkdown] = useState(sampleMarkdown);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1);
-  const [startOffset, setStartOffset] = useState(133); // Default 100% (just below window)
-  const [showSettings, setShowSettings] = useState(false);
-  const [fontSize, setFontSize] = useState(16); // Base font size in px
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFontSize(parseInt(e.target.value));
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Current question data
+  const currentQuestion = compiledQuestions[currentQuestionIndex];
+  const totalQuestions = compiledQuestions.length;
+
+  // Handler for starting the quiz
+  const handleStart = (mode: QuizMode) => {
+    setQuizMode(mode);
+    setIsStarted(true);
   };
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState(0);
-  const [windowHeight, setWindowHeight] = useState(0);
 
-  useEffect(() => {
-    if (contentRef.current && contentRef.current.offsetHeight) {
-      setContentHeight(contentRef.current.offsetHeight);
+  // Handler for selecting an answer
+  const handleAnswerSelect = (value: string) => {
+    const answerValue = parseInt(value);
+    setUserAnswers({
+      ...userAnswers,
+      [currentQuestion.id]: answerValue
+    });
+
+    setQuestionStatus({
+      ...questionStatus,
+      [currentQuestion.id]: 'answered'
+    });
+  };
+
+  // Handler for checking answer
+  const handleCheckAnswer = () => {
+    if (userAnswers[currentQuestion.id] === undefined) return;
+
+    setShowExplanation({
+      ...showExplanation,
+      [currentQuestion.id]: true
+    });
+
+    setQuestionStatus({
+      ...questionStatus,
+      [currentQuestion.id]: 'answered'
+    });
+
+    if (userAnswers[currentQuestion.id] === currentQuestion.correctAnswer && !showExplanation[currentQuestion.id]) {
+      setScore(score + 1);
     }
-    setWindowHeight(window.innerHeight);
+  };
 
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
+  // Handler for skipping question
+  const handleSkip = () => {
+    setQuestionStatus({
+      ...questionStatus,
+      [currentQuestion.id]: 'skipped'
+    });
+    handleNextQuestion();
+  };
+
+  // Navigate to next question
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else if (quizMode === 'test') {
+      setShowFinishDialog(true);
+    }
+  };
+
+  // Finish quiz and calculate final score
+  const finishQuiz = () => {
+    if (quizMode === 'test') {
+      let finalScore = 0;
+      Object.entries(userAnswers).forEach(([id, answer]) => {
+        const question = compiledQuestions.find(q => q.id === parseInt(id));
+        if (question && answer === question.correctAnswer) {
+          finalScore++;
+        }
+      });
+      setScore(finalScore);
+      
+      // Show all explanations in test mode
+      const allExplanations: Record<number, boolean> = {};
+      compiledQuestions.forEach(q => {
+        allExplanations[q.id] = true;
+      });
+      setShowExplanation(allExplanations);
+    }
+    setIsCompleted(true);
+    setShowFinishDialog(false);
+  };
+
+  // Navigate to previous question
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  // Navigate to specific question
+  const handleNavigateToQuestion = (index: number) => {
+    setCurrentQuestionIndex(index);
+  };
+
+  // Restart quiz
+  const handleRestart = () => {
+    setCurrentQuestionIndex(0);
+    setUserAnswers({});
+    setShowExplanation({});
+    setQuestionStatus(() => {
+      const initial: Record<number, QuestionStatus> = {};
+      compiledQuestions.forEach(q => {
+        initial[q.id] = 'unread';
+      });
+      return initial;
+    });
+    setScore(0);
+    setIsCompleted(false);
+    setIsStarted(false);
+  };
+
+  // Save progress
+  const handleSaveProgress = () => {
+    const progress: QuizProgress = {
+      mode: quizMode,
+      currentQuestionIndex,
+      userAnswers,
+      showExplanation,
+      questionStatus,
+      score,
+      isCompleted,
+      timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [markdown]);
+    // Format date in Taipei timezone for filename
+    const now = new Date();
+    const taipeiOptions = { 
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+    const taipeiDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+    const formattedDate = taipeiDate
+      .toLocaleString('en-US', taipeiOptions)
+      .replace(/[\/:]/g, '-')
+      .replace(',', '')
+      .replace(/\s/g, '-');
+    
+    const filename = `quiz-progress_${formattedDate}_${quizMode}-mode.json`;
+    
+    const blob = new Blob([JSON.stringify(progress, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
-  const { toast } = useToast();
-  
-  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  // Load progress
+  const handleLoadProgress = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
-    if (!file.name.endsWith('.md')) {
-      toast({
-        title: 'Invalid File',
-        description: 'Please upload a .md file',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      if (typeof e.target?.result === 'string') {
-        setMarkdown(e.target.result);
-        toast({
-          title: 'File Uploaded',
-          description: `Successfully loaded ${file.name}`,
-        });
-      } else {
-        toast({
-          title: 'Upload Failed',
-          description: 'Could not read file content',
-          variant: 'destructive',
-        });
+    reader.onload = (e) => {
+      try {
+        const progress: QuizProgress = JSON.parse(e.target?.result as string);
+        setQuizMode(progress.mode);
+        setCurrentQuestionIndex(progress.currentQuestionIndex);
+        setUserAnswers(progress.userAnswers);
+        setShowExplanation(progress.showExplanation);
+        setQuestionStatus(progress.questionStatus);
+        setScore(progress.score);
+        setIsCompleted(progress.isCompleted);
+        setIsStarted(true);
+      } catch (error) {
+        console.error('Error loading progress:', error);
+        alert('Invalid progress file format');
       }
-    };
-    reader.onerror = () => {
-      toast({
-        title: 'Upload Failed',
-        description: 'Could not read file',
-        variant: 'destructive',
-      });
     };
     reader.readAsText(file);
   };
 
-  const animationFrameRef = useRef<number>();
-  const startTimeRef = useRef<number>(0);
-  const [currentPosition, setCurrentPosition] = useState(0);
+  // Calculate progress percentage
+  const progressPercentage = ((Object.keys(quizMode === 'study' ? showExplanation : userAnswers).length) / totalQuestions) * 100;
 
-  const animate = (timestamp: number) => {
-    if (!startTimeRef.current) {
-      startTimeRef.current = timestamp;
-    }
-    
-    const elapsed = timestamp - startTimeRef.current;
-    const progress = (elapsed / 1000) * speed * 100; // pixels per second
-    
-    if (containerRef.current) {
-      const newPosition = currentPosition - progress;
-      containerRef.current.style.transform = `translateY(${newPosition}px)`;
-      setCurrentPosition(newPosition);
-      
-      if (isPlaying) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (isPlaying) {
-      startTimeRef.current = 0;
-      animationFrameRef.current = requestAnimationFrame(animate);
-    } else if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isPlaying, speed]);
-
-  const togglePlay = () => {
-    if (!isPlaying) {
-      startTimeRef.current = performance.now() - (currentPosition / (speed * 100)) * 1000;
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleReload = () => {
-    setIsPlaying(false);
-    setCurrentPosition(0);
-    if (containerRef.current) {
-      containerRef.current.style.transform = `translateY(0px)`;
-    }
-  };
-
-  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newSpeed = parseFloat(e.target.value);
-    setSpeed(newSpeed);
-    if (containerRef.current) {
-      const duration = (contentHeight + windowHeight) / (100 * newSpeed);
-      containerRef.current.style.animationDuration = `${duration}s`;
-    }
-  };
-
-  const handleOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newOffset = parseInt(e.target.value);
-    setStartOffset(newOffset);
-  };
-
-  const handleAnimationEnd = () => {
-    setIsPlaying(false);
-  };
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const duration = (contentHeight + windowHeight) / (100 * speed);
-      containerRef.current.style.animationDuration = `${duration}s`;
-    }
-  }, [contentHeight, windowHeight, speed, fontSize]);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.offsetHeight);
-    }
-  }, [fontSize]);
-
-  const renderMarkdown = (text: string): JSX.Element[] => {
-    const baseSize = fontSize;
-    return text.split('\n').map((line: string, index: number) => {
-      // Handle headers
-      if (line.startsWith('### ')) {
-        return (
-          <h3
-            key={index}
-            style={{ fontSize: baseSize * 1.25 }}
-            className="font-bold mt-8 mb-4 text-white"
-          >
-            {line.slice(4)}
-          </h3>
-        );
-      } else if (line.startsWith('## ')) {
-        return (
-          <h2
-            key={index}
-            style={{ fontSize: baseSize * 1.5 }}
-            className="font-bold mt-10 mb-5 text-white"
-          >
-            {line.slice(3)}
-          </h2>
-        );
-      } else if (line.startsWith('# ')) {
-        return (
-          <h1
-            key={index}
-            style={{ fontSize: baseSize * 2 }}
-            className="font-bold mt-12 mb-6 text-white"
-          >
-            {line.slice(2)}
-          </h1>
-        );
-      }
-      
-      // Handle list items
-      if (line.startsWith('* ') || line.startsWith('- ')) {
-        const content = line.slice(2);
-        const formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return (
-          <p
-            key={index}
-            style={{ fontSize: baseSize }}
-            className="my-6 text-white"
-            dangerouslySetInnerHTML={{ __html: formattedContent }}
+  // Show welcome page if not started
+  if (!isStarted) {
+    return (
+      <div className="space-y-4">
+        <WelcomePage onStart={(mode) => {
+          setQuizMode(mode);
+          setIsStarted(true);
+        }} />
+        <div className="flex justify-center">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleLoadProgress}
+            accept=".json"
+            className="hidden"
           />
-        );
-      }
-      
-      // Handle regular text with bold formatting
-      const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      return (
-        <p
-          key={index}
-          style={{ fontSize: baseSize }}
-          className="text-white"
-          dangerouslySetInnerHTML={{ __html: formattedLine }}
-        />
-      );
-    });
-  };
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Load Progress
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show results if completed
+  if (isCompleted) {
+    return <QuizResults 
+      score={score} 
+      totalQuestions={totalQuestions} 
+      onRestart={handleRestart}
+      questionIds={compiledQuestions.map(q => q.id)}
+    />;
+  }
+
+  // Overview data
+  const overviewData = compiledQuestions.map(q => ({
+    id: q.id,
+    status: questionStatus[q.id]
+  }));
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col">
-      {/* Control buttons */}
-      <div className="absolute bottom-4 right-4 z-10 flex gap-2">
-        <button
-          onClick={togglePlay}
-          className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-        >
-          {isPlaying ? <Pause className="text-white" size={24} /> : <Play className="text-white" size={24} />}
-        </button>
-        <button
-          onClick={handleReload}
-          className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-          title="Reload"
-          aria-label="Reload credits"
+    <div className="max-w-3xl mx-auto p-4">
+      <div className="mb-8 space-y-2">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-bold text-blue-800">Oncology Review Quiz</h1>
+            <QuizOverview 
+              questions={overviewData}
+              onNavigate={handleNavigateToQuestion}
+              currentIndex={currentQuestionIndex}
+            />
+          </div>
+          <div className="flex items-center gap-6">
+            <Timer />
+            <div className="text-sm font-medium bg-blue-50 px-4 py-2 rounded-lg">
+              Score: {quizMode === 'study' ? score : '?'}/{totalQuestions}
+            </div>
+          </div>
+        </div>
+        <Progress value={progressPercentage} className="h-2" />
+      </div>
+
+      <QuizQuestion
+        currentQuestionIndex={currentQuestionIndex}
+        totalQuestions={totalQuestions}
+        question={currentQuestion}
+        userAnswers={userAnswers}
+        showExplanation={showExplanation}
+        onAnswerSelect={handleAnswerSelect}
+        mode={quizMode}
+        onBackToMenu={() => {
+          setIsStarted(false);
+          setCurrentQuestionIndex(0);
+        }}
+        onSaveProgress={handleSaveProgress}
+      />
+
+      <div className="flex justify-between mt-6">
+        <Button 
+          onClick={handlePrevQuestion} 
+          disabled={currentQuestionIndex === 0}
+          variant="outline"
+          className="flex items-center gap-2"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-white"
           >
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-            <path d="M21 3v5h-5" />
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-            <path d="M8 16H3v5" />
+            <path d="m15 18-6-6 6-6"/>
           </svg>
-        </button>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
-          title="Settings"
-          aria-label="Open settings"
-          aria-labelledby="settings-button-label"
-        >
-          <MoreVertical className="text-white" size={24} />
-          <span id="settings-button-label" className="sr-only">Settings</span>
-        </button>
-      </div>
-
-      {/* Settings Dialog */}
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="bg-gray-900 text-white border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Settings</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="space-y-4">
-              <label className="flex flex-col gap-2">
-                <span>Starting Position (Y-offset)</span>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={startOffset}
-                    onChange={handleOffsetChange}
-                    className="w-full"
-                    aria-label="Starting position offset"
-                  />
-                  <span className="min-w-[4ch]">{startOffset}%</span>
-                </div>
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span>Scroll Speed</span>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="2"
-                    step="0.1"
-                    value={speed}
-                    onChange={handleSpeedChange}
-                    className="w-full"
-                  />
-                  <span className="min-w-[3ch]">{speed}x</span>
-                </div>
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span>Font Size</span>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="12"
-                    max="32"
-                    step="1"
-                    value={fontSize}
-                    onChange={handleFontSizeChange}
-                    className="w-full"
-                  />
-                  <span className="min-w-[3ch]">{fontSize}px</span>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md transition-colors w-full">
-                <Upload size={20} />
-                <span>Upload Markdown File</span>
-                <input
-                  type="file"
-                  accept=".md"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  aria-label="Upload markdown file"
-                />
-              </label>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Credits container */}
-      <div className="flex-1 overflow-hidden relative">
-        <div
-          ref={containerRef}
-          className="absolute w-full text-center px-4"
-          style={{
-            animation: isPlaying ? `scroll-up ${20 / speed}s linear forwards` : 'none',
-            transform: isPlaying ? 'none' : `translateY(${startOffset}%)`
-          }}
-          onAnimationEnd={handleAnimationEnd}
-        >
-          <div ref={contentRef}>
-            {renderMarkdown(markdown)}
-          </div>
-          <div className="h-24" /> {/* Small padding at bottom */}
+          Previous
+        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleSkip}
+            variant="ghost"
+            className="flex items-center gap-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+            disabled={questionStatus[currentQuestion.id] === 'answered' || showExplanation[currentQuestion.id]}
+          >
+            <SkipForward className="h-4 w-4" />
+            Skip
+          </Button>
+          {quizMode === 'study' ? (
+            <>
+              <Button 
+                onClick={handleCheckAnswer}
+                disabled={userAnswers[currentQuestion.id] === undefined || showExplanation[currentQuestion.id]}
+                className="bg-blue-600 hover:bg-blue-800"
+              >
+                Check Answer
+              </Button>
+              {showExplanation[currentQuestion.id] && (
+                <Button 
+                  onClick={handleNextQuestion}
+                  disabled={currentQuestionIndex === totalQuestions - 1}
+                  className="bg-blue-600 hover:bg-blue-800"
+                >
+                  Next Question
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button 
+              onClick={() => currentQuestionIndex === totalQuestions - 1 ? setShowFinishDialog(true) : handleNextQuestion()}
+              className="bg-blue-600 hover:bg-blue-800"
+            >
+              {currentQuestionIndex === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question'}
+            </Button>
+          )}
         </div>
       </div>
 
-      <style>{`
-        @keyframes scroll-up {
-          0% {
-            transform: translateY(${startOffset}%);
-          }
-          100% {
-            transform: translateY(-${contentHeight + 96}px);
-          }
-        }
-      `}</style>
+      <Dialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>Finish Quiz</span>
+              <span className="text-blue-600">題號{String(currentQuestion.id).padStart(3, '0')}</span>
+            </DialogTitle>
+            <DialogDescription className="space-y-4 pt-4">
+              <p>You are about to finish the quiz and see your results.</p>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <p className="font-medium">Quiz Progress:</p>
+                <p>
+                  Answered Questions: {Object.keys(userAnswers).length}/{totalQuestions}
+                  {Object.keys(userAnswers).length < totalQuestions && (
+                    <span className="text-orange-600 block mt-1">
+                      Note: You have {totalQuestions - Object.keys(userAnswers).length} unanswered questions.
+                    </span>
+                  )}
+                </p>
+                <p>
+                  Skipped Questions: {Object.entries(questionStatus).filter(([_, status]) => status === 'skipped').length}
+                </p>
+              </div>
+              <p>After finishing, you will:</p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>See your final score</li>
+                <li>See correct answers for all questions</li>
+                <li>Have access to detailed explanations</li>
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 mt-6">
+            <Button variant="outline" onClick={() => setShowFinishDialog(false)}>
+              Continue Quiz
+            </Button>
+            <Button onClick={finishQuiz} className="bg-blue-600 hover:bg-blue-800">
+              Show Results
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default CreditsRoll;
+export default OncoQuiz;

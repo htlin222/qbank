@@ -1,0 +1,19 @@
+(2)(4)
+
+1. PIK3CA mutation: Alpelisib → 需要 PIK3CA 突變陽性才能使用
+2. PI3K/AKT/mTOR alteration: Everolimus → 要 HR+/HER2- ，但 Everolimus 不需要特定 PI3K/AKT/mTOR 改變的檢測
+（但如果今天是 Capivasertib–fulvestrant，則要驗到 PIK3CA/AKT1/PTEN-alterations 才可以用）
+3. HER2 overexpression: Trastuzumab, TDM1 → 需要 HER2 IHC 3+ 或 FISH 陽性 （秒殺）
+4. Sacituzumab govitecan (Trodelvy) 屬於抗 Trop-2 ADC，但目前在治療轉移性三陰性乳癌 (mTNBC) 及 HR+/HER2- 乳癌時，並不需要 Trop-2 陽性檢測結果 才能使用。臨床試驗顯示，大多數乳癌患者都有 Trop-2 表現，因此該藥物可適用於廣泛族群。
+
+Ref:
+1. Bardia A, Hurvitz SA, Tolaney SM, et al. Sacituzumab Govitecan in Metastatic Triple-Negative Breast Cancer. New England Journal of Medicine. 2021;384(16):1529-1541. doi:10.1056/nejmoa2028485
+
+2. Baselga J, Campone M, Piccart M, et al. Everolimus in postmenopausal hormone-receptor–positive advanced breast cancer. N Engl J Med. 2012;366(6):520-529. doi:10.1056/NEJMoa1109653
+
+3. Turner NC, Oliveira M, Howell SJ, et al. Capivasertib in Hormone Receptor–Positive Advanced Breast Cancer. New England Journal of Medicine. 2023;388(22):2058-2070. doi:10.1056/nejmoa2214131
+
+4. Corti C. Systemic Therapy in Breast Cancer. American Society of Clinical Oncology Educational Book. Published online July 1, 2024.
+
+
+
