@@ -40,6 +40,27 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
 
   return (
     <Card className="w-full mb-4">
+        <CardFooter className="flex justify-between border-b p-4">
+        <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Back to Menu</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>End Session</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to end this session? You can save your progress before leaving.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowExitDialog(false)}>Cancel</Button>
+              <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
+              <Button variant="destructive" onClick={onBackToMenu}>Exit Session</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
+      </CardFooter>
       <CardHeader className="bg-blue-50 border-b">
         <CardTitle className="text-xl flex justify-between items-center">
           <span>Question {currentQuestionIndex + 1} of {totalQuestions}</span>
@@ -125,24 +146,31 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
                     <p className="whitespace-pre-wrap">{question.explanation}</p>
                     {question.explainFigures.length > 0 && (
                       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {question.explainFigures.map((figure, index) => (
-                          <Dialog key={index}>
-                            <DialogTrigger asChild>
-                              <img 
-                                src={figure}
-                                alt={`Explanation figure ${index + 1}`}
-                                className="max-w-full rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                              />
-                            </DialogTrigger>
-                            <DialogContent className="max-w-[90vw] max-h-[90vh]">
-                              <img 
-                                src={figure}
-                                alt={`Explanation figure ${index + 1}`}
-                                className="w-full h-full object-contain"
-                              />
-                            </DialogContent>
-                          </Dialog>
-                        ))}
+                        {question.explainFigures.map((figure, index) => {
+                          const figureName = figure.split('/').pop()?.split('.')[0] || `Figure ${index + 1}`;
+                          return (
+                            <Dialog key={index}>
+                              <DialogTrigger asChild>
+                                <img 
+                                  src={figure}
+                                  alt={figureName}
+                                  title={figureName}
+                                  className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                                />
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
+                                <DialogHeader>
+                                  <DialogTitle className="text-center">{figureName}</DialogTitle>
+                                </DialogHeader>
+                                <img 
+                                  src={figure}
+                                  alt={figureName}
+                                  className="w-auto max-w-full max-h-[80vh] mx-auto"
+                                />
+                              </DialogContent>
+                            </Dialog>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -152,28 +180,6 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
           </Dialog>
         )}
       </CardContent>
-
-      <CardFooter className="flex justify-between border-t pt-4">
-        <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Back to Menu</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>End Session</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to end this session? You can save your progress before leaving.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowExitDialog(false)}>Cancel</Button>
-              <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
-              <Button variant="destructive" onClick={onBackToMenu}>Exit Session</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
-      </CardFooter>
     </Card>
   );
 };
