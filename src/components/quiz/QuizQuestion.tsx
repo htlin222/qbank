@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Star } from 'lucide-react';
 
 interface QuizQuestionProps {
   currentQuestionIndex: number;
@@ -23,6 +24,8 @@ interface QuizQuestionProps {
   mode?: 'study' | 'test';
   onBackToMenu: () => void;
   onSaveProgress: () => void;
+  starredQuestions: number[];
+  onToggleStar: (questionId: number) => void;
 }
 
 export const QuizQuestion: React.FC<QuizQuestionProps> = ({
@@ -34,31 +37,44 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
   onAnswerSelect,
   mode = 'study',
   onBackToMenu,
-  onSaveProgress
+  onSaveProgress,
+  starredQuestions = [],
+  onToggleStar
 }) => {
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const isStarred = starredQuestions.includes(question.id);
 
   return (
     <Card className="w-full mb-4">
-        <CardFooter className="flex justify-between border-b p-4">
-        <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Back to Menu</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>End Session</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to end this session? You can save your progress before leaving.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowExitDialog(false)}>Cancel</Button>
-              <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
-              <Button variant="destructive" onClick={onBackToMenu}>Exit Session</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <CardFooter className="flex justify-between border-b p-4">
+        <div className="flex gap-2">
+          <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Back to Menu</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>End Session</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to end this session? You can save your progress before leaving.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowExitDialog(false)}>Cancel</Button>
+                <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
+                <Button variant="destructive" onClick={onBackToMenu}>Exit Session</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => onToggleStar(question.id)}
+            className={isStarred ? "text-yellow-500 hover:text-yellow-600" : "text-gray-400 hover:text-gray-500"}
+          >
+            <Star className={isStarred ? "fill-current" : ""} />
+          </Button>
+        </div>
         <Button variant="secondary" onClick={onSaveProgress}>Save Progress</Button>
       </CardFooter>
       <CardHeader className="bg-blue-50 border-b">
@@ -144,36 +160,36 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 <DialogDescription className="text-base text-gray-900">
                   <div className="prose prose-blue max-w-none">
                     <p className="whitespace-pre-wrap">{question.explanation}</p>
-                    {question.explainFigures.length > 0 && (
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {question.explainFigures.map((figure, index) => {
-                          const figureName = figure.split('/').pop()?.split('.')[0] || `Figure ${index + 1}`;
-                          return (
-                            <Dialog key={index}>
-                              <DialogTrigger asChild>
-                                <img 
-                                  src={figure}
-                                  alt={figureName}
-                                  title={figureName}
-                                  className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                                />
-                              </DialogTrigger>
-                              <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="text-center">{figureName}</DialogTitle>
-                                </DialogHeader>
-                                <img 
-                                  src={figure}
-                                  alt={figureName}
-                                  className="w-auto max-w-full max-h-[80vh] mx-auto"
-                                />
-                              </DialogContent>
-                            </Dialog>
-                          );
-                        })}
-                      </div>
-                    )}
                   </div>
+                  {question.explainFigures.length > 0 && (
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {question.explainFigures.map((figure, index) => {
+                        const figureName = figure.split('/').pop()?.split('.')[0] || `Figure ${index + 1}`;
+                        return (
+                          <Dialog key={index}>
+                            <DialogTrigger asChild>
+                              <img 
+                                src={figure}
+                                alt={figureName}
+                                title={figureName}
+                                className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                              />
+                            </DialogTrigger>
+                            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
+                              <DialogHeader>
+                                <DialogTitle className="text-center">{figureName}</DialogTitle>
+                              </DialogHeader>
+                              <img 
+                                src={figure}
+                                alt={figureName}
+                                className="w-auto max-w-full max-h-[80vh] mx-auto"
+                              />
+                            </DialogContent>
+                          </Dialog>
+                        );
+                      })}
+                    </div>
+                  )}
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>

@@ -22,6 +22,7 @@ interface QuizProgress {
   score: number;
   isCompleted: boolean;
   timestamp: string;
+  starredQuestions: number[];
 }
 
 const OncoQuiz = () => {
@@ -38,6 +39,7 @@ const OncoQuiz = () => {
     });
     return initial;
   });
+  const [starredQuestions, setStarredQuestions] = useState<number[]>([]);
   const [score, setScore] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
@@ -47,6 +49,15 @@ const OncoQuiz = () => {
   // Current question data
   const currentQuestion = compiledQuestions[currentQuestionIndex];
   const totalQuestions = compiledQuestions.length;
+
+  // Handler for toggling star status
+  const handleToggleStar = (questionId: number) => {
+    setStarredQuestions(prev => 
+      prev.includes(questionId) 
+        ? prev.filter(id => id !== questionId)
+        : [...prev, questionId]
+    );
+  };
 
   // Handler for starting the quiz
   const handleStart = (mode: QuizMode) => {
@@ -167,7 +178,8 @@ const OncoQuiz = () => {
       questionStatus,
       score,
       isCompleted,
-      timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })
+      timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }),
+      starredQuestions
     };
 
     // Format date in Taipei timezone for filename
@@ -220,6 +232,7 @@ const OncoQuiz = () => {
         setScore(progress.score);
         setIsCompleted(progress.isCompleted);
         setIsStarted(true);
+        setStarredQuestions(progress.starredQuestions);
       } catch (error) {
         console.error('Error loading progress:', error);
         alert('Invalid progress file format');
@@ -263,10 +276,11 @@ const OncoQuiz = () => {
   // Show results if completed
   if (isCompleted) {
     return <QuizResults 
-      score={score} 
-      totalQuestions={totalQuestions} 
+      questions={compiledQuestions}
+      userAnswers={userAnswers}
+      score={score}
+      totalQuestions={totalQuestions}
       onRestart={handleRestart}
-      questionIds={compiledQuestions.map(q => q.id)}
     />;
   }
 
@@ -282,11 +296,18 @@ const OncoQuiz = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-6">
             <h1 className="text-2xl font-bold text-blue-800">Oncology Review Quiz</h1>
-            <QuizOverview 
-              questions={overviewData}
-              onNavigate={handleNavigateToQuestion}
-              currentIndex={currentQuestionIndex}
-            />
+            <div className="flex gap-4">
+              <QuizOverview
+                questions={compiledQuestions.map((q, index) => ({
+                  id: q.id,
+                  status: questionStatus[q.id]
+                }))}
+                onNavigate={handleNavigateToQuestion}
+                currentIndex={currentQuestionIndex}
+                starredQuestions={starredQuestions}
+              />
+              {quizMode === 'test' && <Timer />}
+            </div>
           </div>
           <div className="flex items-center gap-6">
             <Timer />
@@ -298,20 +319,32 @@ const OncoQuiz = () => {
         <Progress value={progressPercentage} className="h-2" />
       </div>
 
-      <QuizQuestion
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={totalQuestions}
-        question={currentQuestion}
-        userAnswers={userAnswers}
-        showExplanation={showExplanation}
-        onAnswerSelect={handleAnswerSelect}
-        mode={quizMode}
-        onBackToMenu={() => {
-          setIsStarted(false);
-          setCurrentQuestionIndex(0);
-        }}
-        onSaveProgress={handleSaveProgress}
-      />
+      {!isCompleted ? (
+        <QuizQuestion
+          currentQuestionIndex={currentQuestionIndex}
+          totalQuestions={totalQuestions}
+          question={currentQuestion}
+          userAnswers={userAnswers}
+          showExplanation={showExplanation}
+          onAnswerSelect={handleAnswerSelect}
+          mode={quizMode}
+          onBackToMenu={() => {
+            setIsStarted(false);
+            setCurrentQuestionIndex(0);
+          }}
+          onSaveProgress={handleSaveProgress}
+          starredQuestions={starredQuestions || []}
+          onToggleStar={handleToggleStar}
+        />
+      ) : (
+        <QuizResults
+          questions={compiledQuestions}
+          userAnswers={userAnswers}
+          score={score}
+          totalQuestions={totalQuestions}
+          onRestart={handleRestart}
+        />
+      )}
 
       <div className="flex justify-between mt-6">
         <Button 
@@ -380,30 +413,28 @@ const OncoQuiz = () => {
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center">
               <span>Finish Quiz</span>
-              <span className="text-blue-600">題號{String(currentQuestion.id).padStart(3, '0')}</span>
             </DialogTitle>
             <DialogDescription className="space-y-4 pt-4">
-              <p>You are about to finish the quiz and see your results.</p>
+              <div>You are about to finish the quiz and see your results.</div>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                <p className="font-medium">Quiz Progress:</p>
-                <p>
+                <div className="font-medium">Quiz Progress:</div>
+                <div>
                   Answered Questions: {Object.keys(userAnswers).length}/{totalQuestions}
-                  {Object.keys(userAnswers).length < totalQuestions && (
-                    <span className="text-orange-600 block mt-1">
-                      Note: You have {totalQuestions - Object.keys(userAnswers).length} unanswered questions.
-                    </span>
-                  )}
-                </p>
-                <p>
-                  Skipped Questions: {Object.entries(questionStatus).filter(([_, status]) => status === 'skipped').length}
-                </p>
+                </div>
+                {Object.keys(userAnswers).length < totalQuestions && (
+                  <div className="text-orange-600 mt-1">
+                    Note: You have {totalQuestions - Object.keys(userAnswers).length} unanswered questions.
+                  </div>
+                )}
               </div>
-              <p>After finishing, you will:</p>
-              <ul className="list-disc list-inside space-y-2">
-                <li>See your final score</li>
-                <li>See correct answers for all questions</li>
-                <li>Have access to detailed explanations</li>
-              </ul>
+              <div>
+                <p>After finishing, you will:</p>
+                <ul className="list-disc list-inside space-y-2">
+                  <li>See your final score</li>
+                  <li>See correct answers for all questions</li>
+                  <li>Have access to detailed explanations</li>
+                </ul>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 mt-6">
