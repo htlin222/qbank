@@ -3,14 +3,24 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface QuizResultsProps {
-  questions: Array<{ id: number }>;
+  questions: Array<{ 
+    id: number;
+    correctAnswer: number;
+  }>;
   userAnswers: Record<number, number>;
   score: number;
   totalQuestions: number;
   onRestart: () => void;
 }
+
+const numberToLetter = (num: number): string => {
+  if (num === undefined || num === null) return '';
+  return String.fromCharCode(65 + num); // A=0, B=1, etc.
+};
 
 export const QuizResults: React.FC<QuizResultsProps> = ({
   questions,
@@ -40,7 +50,6 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
         <CardHeader className="bg-blue-600 text-white">
           <CardTitle className="text-2xl flex justify-between items-center">
             <span>Quiz Completed!</span>
-            <span className="text-sm">題號{String(lastQuestionId).padStart(3, '0')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6 pb-4">
@@ -62,6 +71,38 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                 <AlertTitle>Performance</AlertTitle>
                 <AlertDescription>{message}</AlertDescription>
               </Alert>
+            </div>
+            <div className="w-full mt-6">
+              <div className="grid grid-cols-10 gap-2">
+                {questions.map((question) => {
+                  const userAnswer = numberToLetter(userAnswers[question.id]);
+                  const correctAnswer = numberToLetter(question.correctAnswer);
+                  const isWrong = userAnswers[question.id] !== question.correctAnswer;
+                  const questionId = String(question.id).padStart(3, '0');
+                  return (
+                    <Button
+                      key={question.id}
+                      variant="outline"
+                      className={cn(
+                        "h-auto py-2 px-3 text-xs font-normal",
+                        isWrong ? "text-red-600" : "text-green-600"
+                      )}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className="bg-slate-100">{questionId}</Badge>
+                        {isWrong ? (
+                          <div className='flex-row'>
+                            <del className="text-red-600 p-1">{userAnswer}</del>
+                            <span className="text-green-600 p-1">{correctAnswer}</span>
+                          </div>
+                        ) : (
+                          <span>{correctAnswer}</span>
+                        )}
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </CardContent>

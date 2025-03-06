@@ -428,7 +428,7 @@ const OncoQuiz = () => {
                 )}
               </div>
               <div>
-                <p>After finishing, you will:</p>
+                <div>After finishing, you will:</div>
                 <ul className="list-disc list-inside space-y-2">
                   <li>See your final score</li>
                   <li>See correct answers for all questions</li>
