@@ -93,7 +93,8 @@ const OncoQuiz = () => {
       [currentQuestion.id]: 'answered'
     });
 
-    if (userAnswers[currentQuestion.id] === currentQuestion.correctAnswer && !showExplanation[currentQuestion.id]) {
+    // In study mode, increment score immediately for correct answers
+    if (quizMode === 'study' && userAnswers[currentQuestion.id] === currentQuestion.correctAnswer && !showExplanation[currentQuestion.id]) {
       setScore(score + 1);
     }
   };
@@ -118,24 +119,15 @@ const OncoQuiz = () => {
 
   // Finish quiz and calculate final score
   const finishQuiz = () => {
-    if (quizMode === 'test') {
-      let finalScore = 0;
-      Object.entries(userAnswers).forEach(([id, answer]) => {
-        const question = compiledQuestions.find(q => q.id === parseInt(id));
-        if (question && answer === question.correctAnswer) {
-          finalScore++;
-        }
-      });
-      setScore(finalScore);
-      
-      // Show all explanations in test mode
-      const allExplanations: Record<number, boolean> = {};
-      compiledQuestions.forEach(q => {
-        allExplanations[q.id] = true;
-      });
-      setShowExplanation(allExplanations);
-    }
+    const answeredQuestions = Object.keys(userAnswers).length;
+    const correctAnswers = compiledQuestions.reduce((count, question) => {
+      return userAnswers[question.id] === question.correctAnswer ? count + 1 : count;
+    }, 0);
+    // Always store raw score for consistency
+    setScore(correctAnswers);
     setIsCompleted(true);
+    // Clear localStorage since quiz is completed
+    localStorage.removeItem('quizProgress');
     setShowFinishDialog(false);
   };
 
@@ -153,6 +145,8 @@ const OncoQuiz = () => {
 
   // Restart quiz
   const handleRestart = () => {
+    setIsStarted(false);
+    setQuizMode('study');
     setCurrentQuestionIndex(0);
     setUserAnswers({});
     setShowExplanation({});
@@ -163,9 +157,12 @@ const OncoQuiz = () => {
       });
       return initial;
     });
+    setStarredQuestions([]);
     setScore(0);
     setIsCompleted(false);
-    setIsStarted(false);
+    setShowFinishDialog(false);
+    // Clear localStorage
+    localStorage.removeItem('quizProgress');
   };
 
   // Save progress
@@ -232,13 +229,37 @@ const OncoQuiz = () => {
         setScore(progress.score);
         setIsCompleted(progress.isCompleted);
         setIsStarted(true);
-        setStarredQuestions(progress.starredQuestions);
+        setStarredQuestions(progress.starredQuestions || []);
+        // Save loaded progress to localStorage
+        localStorage.setItem('quizProgress', JSON.stringify(progress));
       } catch (error) {
         console.error('Error loading progress:', error);
-        alert('Invalid progress file format');
       }
     };
     reader.readAsText(file);
+  };
+
+  // Handler for exiting session
+  const handleExitSession = () => {
+    // Clear all quiz state
+    setIsStarted(false);
+    setQuizMode('study');
+    setCurrentQuestionIndex(0);
+    setUserAnswers({});
+    setShowExplanation({});
+    setQuestionStatus(() => {
+      const initial: Record<number, QuestionStatus> = {};
+      compiledQuestions.forEach(q => {
+        initial[q.id] = 'unread';
+      });
+      return initial;
+    });
+    setStarredQuestions([]);
+    setScore(0);
+    setIsCompleted(false);
+    setShowFinishDialog(false);
+    // Clear localStorage
+    localStorage.removeItem('quizProgress');
   };
 
   // Calculate progress percentage
@@ -309,12 +330,6 @@ const OncoQuiz = () => {
               {quizMode === 'test' && <Timer />}
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <Timer />
-            <div className="text-sm font-medium bg-blue-50 px-4 py-2 rounded-lg">
-              Score: {quizMode === 'study' ? score : '?'}/{totalQuestions}
-            </div>
-          </div>
         </div>
         <Progress value={progressPercentage} className="h-2" />
       </div>
@@ -328,10 +343,7 @@ const OncoQuiz = () => {
           showExplanation={showExplanation}
           onAnswerSelect={handleAnswerSelect}
           mode={quizMode}
-          onBackToMenu={() => {
-            setIsStarted(false);
-            setCurrentQuestionIndex(0);
-          }}
+          onBackToMenu={handleExitSession}
           onSaveProgress={handleSaveProgress}
           starredQuestions={starredQuestions || []}
           onToggleStar={handleToggleStar}
@@ -389,11 +401,11 @@ const OncoQuiz = () => {
               </Button>
               {showExplanation[currentQuestion.id] && (
                 <Button 
-                  onClick={handleNextQuestion}
-                  disabled={currentQuestionIndex === totalQuestions - 1}
+                  onClick={() => currentQuestionIndex === totalQuestions - 1 ? setShowFinishDialog(true) : handleNextQuestion()}
+                  disabled={currentQuestionIndex === totalQuestions - 1 && isCompleted}
                   className="bg-blue-600 hover:bg-blue-800"
                 >
-                  Next Question
+                  {currentQuestionIndex === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question'}
                 </Button>
               )}
             </>
@@ -431,7 +443,7 @@ const OncoQuiz = () => {
                 <div>After finishing, you will:</div>
                 <ul className="list-disc list-inside space-y-2">
                   <li>See your final score</li>
-                  <li>See correct answers for all questions</li>
+                  <li>See {quizMode === 'test' ? 'correct answers' : 'a review'} for all questions</li>
                   <li>Have access to detailed explanations</li>
                 </ul>
               </div>
@@ -442,7 +454,7 @@ const OncoQuiz = () => {
               Continue Quiz
             </Button>
             <Button onClick={finishQuiz} className="bg-blue-600 hover:bg-blue-800">
-              Show Results
+              See Results
             </Button>
           </DialogFooter>
         </DialogContent>
