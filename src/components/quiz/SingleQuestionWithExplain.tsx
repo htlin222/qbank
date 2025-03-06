@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
 interface SingleQuestionWithExplainProps {
@@ -38,8 +38,11 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>Question Details</span>
-            <span className="text-blue-600">{`題號${String(question.id).padStart(3, '0')}`}</span>
+            <span className="text-blue-600 pr-7">{`題號${String(question.id).padStart(3, '0')}`}</span>
           </DialogTitle>
+          <DialogDescription>
+            Review question details, including the answer{mode === 'test' && userAnswer === undefined ? '' : ' and explanation'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
