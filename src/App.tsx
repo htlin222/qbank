@@ -304,7 +304,7 @@ const OncoQuiz = () => {
       <div className="mb-8 space-y-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-bold text-blue-800">Oncology Review Quiz</h1>
+            <h1 className="text-2xl font-bold text-blue-800">113年度腫專考古題</h1>
             <div className="flex gap-4">
               <QuizOverview
                 questions={compiledQuestions.map(q => ({
