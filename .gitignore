@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 /public/qbank/
+
+# Local Netlify folder
+.netlify
