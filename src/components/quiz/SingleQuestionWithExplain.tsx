@@ -34,26 +34,26 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
+      <DialogContent className="w-[90vw] sm:w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto p-2 sm:p-6">
+        <DialogHeader className="p-0 sm:p-2">
+          <DialogTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 text-base sm:text-lg">
             <span>Question Details</span>
-            <span className="text-blue-600 pr-7">{`題號${String(question.id).padStart(3, '0')}`}</span>
+            <span className="text-blue-600 text-sm">{`題號${String(question.id).padStart(3, '0')}`}</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Review question details, including the answer{mode === 'test' && userAnswer === undefined ? '' : ' and explanation'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6 mt-2">
           {/* Question Text */}
-          <div className="text-lg font-medium text-gray-800 whitespace-pre-line">
+          <div className="text-sm sm:text-lg font-medium text-gray-800 whitespace-pre-line break-words overflow-wrap-anywhere hyphens-auto">
             {question.question}
           </div>
 
           {/* Question Figures */}
           {question.questionFigures.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {question.questionFigures.map((figure, index) => {
                 const figureName = figure.split('/').pop()?.split('.')[0] || `Question Figure ${index + 1}`;
                 return (
@@ -63,22 +63,22 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
                         src={figure}
                         alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                         title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                        className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                        className="max-w-full h-auto max-h-[50vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
                       />
                     </DialogTrigger>
-                    <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
-                      <DialogHeader>
-                        <DialogTitle className="text-center">
+                    <DialogContent className="w-[90vw] sm:w-[95vw] max-w-[90vw] max-h-[90vh] overflow-auto p-2 sm:p-6">
+                      <DialogHeader className="p-0 sm:p-2">
+                        <DialogTitle className="text-center text-sm sm:text-base">
                           {`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                         </DialogTitle>
-                        <DialogDescription className="text-center text-gray-600">
+                        <DialogDescription className="text-center text-xs sm:text-sm text-gray-600">
                           Click anywhere outside to close the image
                         </DialogDescription>
                       </DialogHeader>
                       <img 
                         src={figure}
                         alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                        className="w-auto max-w-full max-h-[80vh] mx-auto"
+                        className="w-auto max-w-full max-h-[70vh] mx-auto"
                       />
                     </DialogContent>
                   </Dialog>
@@ -88,12 +88,12 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
           )}
 
           {/* Options */}
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4">
             {question.options.map((option, index) => {
               const isSelected = userAnswer === index;
               const isCorrect = index === question.correctAnswer;
               
-              let className = "flex items-center p-3 rounded-md border";
+              let className = "flex items-start p-2 sm:p-3 rounded-md border break-words overflow-wrap-anywhere hyphens-auto";
               
               // In test mode, only show blue highlight for selected answers until completion
               if (mode === 'test' && userAnswer === undefined) {
@@ -111,9 +111,9 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
 
               return (
                 <div key={index} className={className}>
-                  <Label className="flex-grow">
-                    <span className="font-medium mr-2">{String.fromCharCode(65 + index)}.</span>
-                    {option}
+                  <Label className="flex-grow text-xs sm:text-base">
+                    <span className="font-medium mr-1 sm:mr-2 align-top">{String.fromCharCode(65 + index)}.</span>
+                    <span className="inline-block">{option}</span>
                   </Label>
                 </div>
               );
@@ -122,7 +122,7 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
 
           {/* Answer Status - only show in study mode or after test completion */}
           {(mode === 'study' || userAnswer !== undefined) && (
-            <div className="flex gap-4 items-center text-lg">
+            <div className="flex flex-wrap gap-x-2 gap-y-1 items-center text-xs sm:text-base">
               <span>Your Answer: </span>
               {userAnswer !== undefined ? (
                 <span className={mode === 'test' && userAnswer === undefined ? "text-blue-600" : isWrong ? "text-red-600" : "text-green-600"}>
@@ -143,14 +143,14 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
           {/* Explanation - only show in study mode or after test completion */}
           {(mode === 'study' || userAnswer !== undefined) && (
             <>
-              <div className="prose prose-blue max-w-none">
-                <h3 className="text-lg font-semibold">Explanation</h3>
-                <p className="whitespace-pre-wrap">{question.explanation}</p>
+              <div className="prose prose-sm sm:prose-base prose-blue max-w-none">
+                <h3 className="text-sm sm:text-lg font-semibold">Explanation</h3>
+                <p className="text-xs sm:text-base whitespace-pre-wrap break-words overflow-wrap-anywhere hyphens-auto">{question.explanation}</p>
               </div>
 
               {/* Explanation Figures */}
               {question.explainFigures.length > 0 && (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-2 sm:mt-4 grid grid-cols-1 gap-3">
                   {question.explainFigures.map((figure, index) => {
                     const figureName = figure.split('/').pop()?.split('.')[0] || `Explanation Figure ${index + 1}`;
                     return (
@@ -161,24 +161,24 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
                               src={figure}
                               alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                               title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                              className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                              className="max-w-full h-auto max-h-[50vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
                             />
-                            <p className="text-center text-sm text-gray-600 mt-1">{figureName}</p>
+                            <p className="text-center text-xs text-gray-600 mt-1">{figureName}</p>
                           </div>
                         </DialogTrigger>
-                        <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
-                          <DialogHeader>
-                            <DialogTitle className="text-center">
+                        <DialogContent className="w-[90vw] sm:w-[95vw] max-w-[90vw] max-h-[90vh] overflow-auto p-2 sm:p-6">
+                          <DialogHeader className="p-0 sm:p-2">
+                            <DialogTitle className="text-center text-sm sm:text-base">
                               {`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                             </DialogTitle>
-                            <DialogDescription className="text-center text-gray-600">
+                            <DialogDescription className="text-center text-xs sm:text-sm text-gray-600">
                               Click anywhere outside to close the image
                             </DialogDescription>
                           </DialogHeader>
                           <img 
                             src={figure}
                             alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                            className="w-auto max-w-full max-h-[80vh] mx-auto"
+                            className="w-auto max-w-full max-h-[70vh] mx-auto"
                           />
                         </DialogContent>
                       </Dialog>
