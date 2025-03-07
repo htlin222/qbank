@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
+import { Explanation } from './Explanation';
 
 interface QuizQuestionProps {
   currentQuestionIndex: number;
@@ -146,101 +147,17 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
         </RadioGroup>
 
         {showExplanation[question.id] && (
-          <Dialog>
-            <DialogTrigger asChild>
+          <Explanation 
+            question={question}
+            userAnswer={userAnswers[question.id]}
+            mode={mode}
+            trigger={
               <Button variant="outline" className="mt-6 w-full">
                 View Detailed Explanation
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex justify-between items-center">
-                  <span>Explanation</span>
-                  <span className="text-blue-600 pr-6">題號{String(question.id).padStart(3, '0')}</span>
-                </DialogTitle>
-              </DialogHeader>
-              <Accordion type="single" collapsible className="w-full border-t">
-                <AccordionItem value="question-summary" className="border-b-0">
-                  <AccordionTrigger className="text-xs py-2 hover:no-underline">
-                    <div className="flex items-center gap-2">
-                      <span>顯示題目及選項</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-xs text-gray-500">
-                    <div className="pb-2 whitespace-pre-wrap">{question.question}</div>
-                    <div className="space-y-1">
-                      {question.options.map((option, index) => {
-                        const letter = String.fromCharCode(65 + index); // Convert 0,1,2,3,4 to A,B,C,D,E
-                        const isSelected = userAnswers[question.id] === index;
-                        const isCorrect = question.correctAnswer === index;
-                        const showCorrectness = mode === 'study' || (mode === 'test' && showExplanation[question.id]);
-                        return (
-                          <div 
-                            key={index} 
-                            className={`${
-                              showCorrectness ? (
-                                isSelected && isCorrect ? 'text-green-600 font-medium' : 
-                                isSelected && !isCorrect ? 'text-red-600 font-medium' :
-                                isCorrect ? 'text-green-600 font-medium' : ''
-                              ) : (
-                                isSelected ? 'text-blue-600 font-medium' : ''
-                              )
-                            }`}
-                          >
-                            {letter}. {option}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {userAnswers[question.id] !== undefined && (
-                      <div className="pt-2 font-medium">
-                        Selected: {String.fromCharCode(65 + userAnswers[question.id])}
-                        {(mode === 'study' || (mode === 'test' && showExplanation[question.id])) && (
-                          <span className="ml-2">
-                            | Correct: {String.fromCharCode(65 + question.correctAnswer)}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              <DialogDescription className="text-base text-gray-900">
-                <div className="prose prose-blue max-w-none">
-                  <p className="whitespace-pre-wrap">{question.explanation}</p>
-                </div>
-                {question.explainFigures.length > 0 && (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {question.explainFigures.map((figure, index) => {
-                      const figureName = figure.split('/').pop()?.split('.')[0] || `Figure ${index + 1}`;
-                      return (
-                        <Dialog key={index}>
-                          <DialogTrigger asChild>
-                            <img 
-                              src={figure}
-                              alt={figureName}
-                              title={figureName}
-                              className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                            />
-                          </DialogTrigger>
-                          <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-auto">
-                            <DialogHeader>
-                              <DialogTitle className="text-center">{figureName}</DialogTitle>
-                            </DialogHeader>
-                            <img 
-                              src={figure}
-                              alt={figureName}
-                              className="w-auto max-w-full max-h-[80vh] mx-auto"
-                            />
-                          </DialogContent>
-                        </Dialog>
-                      );
-                    })}
-                  </div>
-                )}
-              </DialogDescription>
-            </DialogContent>
-          </Dialog>
+            }
+            showCorrectness={mode === 'study' || (mode === 'test' && showExplanation[question.id])}
+          />
         )}
       </CardContent>
     </Card>

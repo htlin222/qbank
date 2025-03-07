@@ -109,7 +109,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
               )}
             </div>
             <div className="w-full mt-6">
-              <div className="grid grid-cols-10 gap-2">
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
                 {questions.map((question) => {
                   const userAnswer = numberToLetter(userAnswers[question.id]);
                   const correctAnswer = numberToLetter(question.correctAnswer);
