@@ -65,7 +65,7 @@ export const QuizOverview: React.FC<QuizOverviewProps> = ({
           Overview
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[600px] p-6">
+      <SheetContent side="right" className="w-full sm:w-[80%] md:w-[600px] lg:w-[600px] p-6">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-2xl font-bold">Quiz Overview</SheetTitle>
           <SheetDescription>

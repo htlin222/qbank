@@ -36,8 +36,6 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
       useExtendedSearch: true,
       minMatchCharLength: 1,
       distance: 1000,
-      tokenize: true,
-      matchAllTokens: false,
     });
   }, []);
 

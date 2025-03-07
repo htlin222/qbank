@@ -423,21 +423,17 @@ const OncoQuiz = () => {
           {quizMode === 'study' ? (
             <>
               <Button 
-                onClick={handleCheckAnswer}
-                disabled={userAnswers[currentQuestion.id] === undefined || showExplanation[currentQuestion.id]}
+                onClick={showExplanation[currentQuestion.id] 
+                  ? (currentQuestionIndex === totalQuestions - 1 ? () => setShowFinishDialog(true) : handleNextQuestion)
+                  : handleCheckAnswer}
+                disabled={(userAnswers[currentQuestion.id] === undefined && !showExplanation[currentQuestion.id]) || 
+                  (currentQuestionIndex === totalQuestions - 1 && isCompleted && showExplanation[currentQuestion.id])}
                 className="bg-blue-600 hover:bg-blue-800"
               >
-                Check Answer
+                {showExplanation[currentQuestion.id] 
+                  ? (currentQuestionIndex === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question')
+                  : 'Check Answer'}
               </Button>
-              {showExplanation[currentQuestion.id] && (
-                <Button 
-                  onClick={() => currentQuestionIndex === totalQuestions - 1 ? setShowFinishDialog(true) : handleNextQuestion()}
-                  disabled={currentQuestionIndex === totalQuestions - 1 && isCompleted}
-                  className="bg-blue-600 hover:bg-blue-800"
-                >
-                  {currentQuestionIndex === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question'}
-                </Button>
-              )}
             </>
           ) : (
             <Button 
