@@ -11,15 +11,20 @@ const projectRoot = path.resolve(__dirname, '..');
  * Adjust these values to control how explanations are split into multiple slides
  */
 const SLIDE_BREAKING_CONFIG = {
-  // Maximum number of lines per slide before creating a new slide
-  MAX_LINES_PER_SLIDE: 22,
+  // Maximum number of lines per slide
+  MAX_LINES_PER_SLIDE: 18,
   
-  // Maximum number of characters per slide before creating a new slide
-  MAX_CHARS_PER_SLIDE: 700,
+  // Maximum length of a single line
+  MAX_LINE_LENGTH: 105,
   
-  // Maximum length of a single line before creating a new slide
-  // Useful for preventing very long lines from making slides too crowded
-  MAX_LINE_LENGTH: 120
+  // Number of questions per group
+  QUESTIONS_PER_GROUP: 20
+};
+
+// Document configuration
+const DOCUMENT_CONFIG = {
+  // Title for the document
+  TITLE: "113年腫專考古題詳解"
 };
 
 async function readTextFile(filePath) {
@@ -32,163 +37,202 @@ async function readTextFile(filePath) {
   }
 }
 
-// Function to break long explanations into multiple slides
+/**
+ * Breaks explanation text into multiple slides if it's too long
+ * @param {string} explanation - The explanation text to break
+ * @returns {string[]} - Array of explanation parts, each representing a slide
+ */
 function breakExplanationIntoSlides(explanation) {
-  if (!explanation) return '';
-  
+  // Split explanation into lines
   const lines = explanation.split('\n');
+  
+  // Preprocess each line into a dictionary with metadata
+  const processedLines = lines.map((content, index) => {
+    const charCount = content.length;
+    const linesNeeded = Math.ceil(charCount / SLIDE_BREAKING_CONFIG.MAX_LINE_LENGTH);
+    
+    return {
+      index,
+      content,
+      charCount,
+      linesNeeded: linesNeeded > 0 ? linesNeeded : 1 // Even empty lines take up 1 line
+    };
+  });
+  
+  // Group lines into slides based on linesNeeded
+  const slides = [];
   let currentSlide = [];
-  let slides = [];
-  let currentLineCount = 0;
-  let currentCharCount = 0;
+  let currentLinesCount = 0;
   
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    
-    // Skip empty lines at the beginning of a slide
-    if (currentSlide.length === 0 && line.trim() === '') {
-      continue;
-    }
-    
-    // Check if this line looks like a reference (starts with a number or name followed by a period)
-    const isReference = /^\d+\.|\w+\s+\w+,\s+\w+\s+\w+/.test(line.trim());
-    
-    // Add the current line to the current slide
-    currentSlide.push(line);
-    currentLineCount++;
-    currentCharCount += line.length;
-    
-    // Check if we need to create a new slide after adding this line
-    // Only check if this isn't the last line
-    if (i < lines.length - 1) {
-      // Don't break in the middle of a reference
-      if (isReference) {
-        continue;
+  for (const line of processedLines) {
+    // Check if adding this line would exceed the limit
+    if (currentLinesCount + line.linesNeeded > SLIDE_BREAKING_CONFIG.MAX_LINES_PER_SLIDE) {
+      // Add current slide to slides array if not empty
+      if (currentSlide.length > 0) {
+        slides.push(currentSlide.map(l => l.content).join('\n'));
       }
       
-      const shouldBreak = 
-        currentLineCount >= SLIDE_BREAKING_CONFIG.MAX_LINES_PER_SLIDE || 
-        currentCharCount >= SLIDE_BREAKING_CONFIG.MAX_CHARS_PER_SLIDE || 
-        line.length > SLIDE_BREAKING_CONFIG.MAX_LINE_LENGTH;
-      
-      if (shouldBreak) {
-        // Only add the slide if it has content
-        if (currentSlide.length > 0 && currentSlide.some(l => l.trim() !== '')) {
-          slides.push(currentSlide.join('\n'));
-        }
-        // Reset for the next slide
-        currentSlide = [];
-        currentLineCount = 0;
-        currentCharCount = 0;
-      }
+      // Start a new slide with this line
+      currentSlide = [line];
+      currentLinesCount = line.linesNeeded;
+    } else {
+      // Add the line to the current slide
+      currentSlide.push(line);
+      currentLinesCount += line.linesNeeded;
     }
   }
   
-  // Add the last slide if there's anything left and it has content
-  if (currentSlide.length > 0 && currentSlide.some(l => l.trim() !== '')) {
-    slides.push(currentSlide.join('\n'));
+  // Add the last slide if it's not empty
+  if (currentSlide.length > 0) {
+    slides.push(currentSlide.map(l => l.content).join('\n'));
   }
   
-  // Join all slides with page breaks
-  return slides.join('\n\n---\n\n');
-}
-
-async function getImagesInDirectory(dirPath, questionNumber) {
-  try {
-    const files = await fs.readdir(dirPath);
-    return files
-      .filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file))
-      .map(file => {
-        return {
-          name: path.basename(file, path.extname(file)),
-          path: `./${questionNumber}/explain_figures/${file}`
-        };
-      });
-  } catch {
-    return [];
-  }
+  return slides;
 }
 
 async function compileQuestionToMarp(questionDir) {
   const questionNumber = path.basename(questionDir);
   
-  // Read question text and options
-  const question = await readTextFile(path.join(questionDir, 'question.txt'));
-  const optionA = await readTextFile(path.join(questionDir, 'option_A.txt'));
-  const optionB = await readTextFile(path.join(questionDir, 'option_B.txt'));
-  const optionC = await readTextFile(path.join(questionDir, 'option_C.txt'));
-  const optionD = await readTextFile(path.join(questionDir, 'option_D.txt'));
-  const optionE = await readTextFile(path.join(questionDir, 'option_E.txt'));
-  const explanation = await readTextFile(path.join(questionDir, 'explain.txt'));
-  const correctAnswer = await readTextFile(path.join(questionDir, 'correct_answer.txt'));
-
-  // Get explanation figures
-  const explainFigures = await getImagesInDirectory(
-    path.join(questionDir, 'explain_figures'),
-    questionNumber
-  );
-
-  // Format the question in Marp markdown format
-  let marpContent = `## Question ${questionNumber}\n\n${question}\n\n`;
-  
-  // Add options
-  if (optionA) marpContent += `- A. ${optionA}\n`;
-  if (optionB) marpContent += `- B. ${optionB}\n`;
-  if (optionC) marpContent += `- C. ${optionC}\n`;
-  if (optionD) marpContent += `- D. ${optionD}\n`;
-  if (optionE) marpContent += `- E. ${optionE}\n`;
-  
-  // Add correct answer and break explanation into multiple slides if needed
-  marpContent += `\n### Correct Answer ${correctAnswer}\n\n`;
-  
-  // Break explanation into multiple slides
-  marpContent += breakExplanationIntoSlides(explanation) + '\n\n';
-  
-  // Add figures if there are any
-  if (explainFigures.length > 0) {
-    // No "### Figures" heading
+  try {
+    // Read question, options, explanation, and figures
+    const question = await readTextFile(path.join(questionDir, 'question.txt'));
+    const optionA = await readTextFile(path.join(questionDir, 'option_A.txt'));
+    const optionB = await readTextFile(path.join(questionDir, 'option_B.txt'));
+    const optionC = await readTextFile(path.join(questionDir, 'option_C.txt'));
+    const optionD = await readTextFile(path.join(questionDir, 'option_D.txt'));
+    const optionE = await readTextFile(path.join(questionDir, 'option_E.txt'));
+    const explanation = await readTextFile(path.join(questionDir, 'explain.txt'));
+    const correctAnswer = await readTextFile(path.join(questionDir, 'correct_answer.txt'));
+    
+    // Read explanation figures
+    const explainFiguresDir = path.join(questionDir, 'explain_figures');
+    let explainFigures = [];
+    try {
+      const explainFigureFiles = await fs.readdir(explainFiguresDir);
+      explainFigures = explainFigureFiles
+        .filter(file => !file.startsWith('.')) // Skip hidden files
+        .map(file => ({
+          name: path.basename(file, path.extname(file)),
+          path: `/qabank/${questionNumber}/explain_figures/${file}`
+        }));
+    } catch (error) {
+      // No explanation figures or directory doesn't exist, continue without them
+    }
+    
+    // Format the question in Marp markdown format
+    let marpContent = `## Question ${questionNumber}\n\n${question}\n\n`;
+    
+    // Add options if there are any
+    marpContent += `- A. ${optionA}\n`;
+    marpContent += `- B. ${optionB}\n`;
+    marpContent += `- C. ${optionC}\n`;
+    marpContent += `- D. ${optionD}\n`;
+    marpContent += `- E. ${optionE}\n\n`;
+    
+    // Add correct answer if there is one
+    if (correctAnswer) {
+      marpContent += `### Correct Answer ${correctAnswer}\n\n`;
+    }
+    
+    // Add explanation if there is one, breaking into multiple slides if needed
+    if (explanation) {
+      // Apply slide breaking logic to the explanation
+      const explanationSlides = breakExplanationIntoSlides(explanation);
+      
+      // Add each slide with a page break
+      for (let i = 0; i < explanationSlides.length; i++) {
+        if (i > 0) {
+          marpContent += `---\n\n`;
+        }
+        marpContent += explanationSlides[i] + '\n\n';
+      }
+    }
+    
+    // Add figures if there are any, each on its own slide
     for (let i = 0; i < explainFigures.length; i++) {
       const figure = explainFigures[i];
-      marpContent += `---\n\n#### ${figure.name}\n\n![bg w:1150px h:650px](${figure.path})\n\n`;
+      marpContent += `---\n\n![w:1150px h:650px](${figure.path})\n\n> ${figure.name}\n\n`;
     }
+    
+    return {
+      id: parseInt(questionNumber),
+      content: marpContent
+    };
+  } catch (error) {
+    console.error(`Error compiling question ${questionNumber}:`, error);
+    return {
+      id: parseInt(questionNumber),
+      content: `## Question ${questionNumber}\n\nError loading question content: ${error.message}`
+    };
   }
-  
-  return {
-    id: parseInt(questionNumber),
-    content: marpContent
-  };
 }
 
 async function compileMarp() {
-  const qabankPath = path.join(projectRoot, 'public/qabank');
-  const outputDir = path.join(projectRoot, 'dist/qabank');
-  const outputPath = path.join(outputDir, 'all.md');
-  const frontmatterPath = path.join(projectRoot, 'public/marpfrontmatter.md');
-
   try {
-    // Ensure output directory exists
-    await fs.mkdir(outputDir, { recursive: true });
+    // Initialize the final content with the front matter
+    let finalContent = '';
+    let hasTitleInFrontmatter = false;
+    
+    // Try to read the front matter template
+    const frontmatterPath = path.join(projectRoot, 'public', 'marpfrontmatter.md');
+    try {
+      const frontmatterContent = await fs.readFile(frontmatterPath, 'utf-8');
+      finalContent += frontmatterContent;
+      
+      // Check if the frontmatter already contains a title
+      hasTitleInFrontmatter = frontmatterContent.includes(`title: "${DOCUMENT_CONFIG.TITLE}"`);
+    } catch (error) {
+      console.warn('Marp frontmatter file not found or could not be read. Continuing without it.');
+    }
+    
+    // Add the document title (only once)
+    if (!hasTitleInFrontmatter) {
+      finalContent += `\n\n# ${DOCUMENT_CONFIG.TITLE}\n\n`;
+    }
     
     // Get all question directories
-    const dirs = await fs.readdir(qabankPath);
-    const questionDirs = dirs
-      .filter(dir => /^\d+$/.test(dir))
-      .sort((a, b) => parseInt(a) - parseInt(b))
-      .map(dir => path.join(qabankPath, dir));
-
-    // Group questions by 30s for section headers
-    const questionsByGroup = {};
+    const qabankDir = path.join(projectRoot, 'public', 'qabank');
+    const questionDirs = await fs.readdir(qabankDir);
     
-    // Compile all questions
-    const questions = await Promise.all(questionDirs.map(compileQuestionToMarp));
+    // Filter out non-directory items and sort by question number
+    const filteredDirs = [];
+    for (const dir of questionDirs) {
+      if (dir.startsWith('.')) continue; // Skip hidden files
+      
+      try {
+        const stat = await fs.stat(path.join(qabankDir, dir));
+        if (stat.isDirectory()) {
+          filteredDirs.push(dir);
+        }
+      } catch (error) {
+        // Skip if there's an error
+      }
+    }
+    
+    // Sort directories by question number
+    filteredDirs.sort((a, b) => parseInt(a) - parseInt(b));
+    
+    // Compile each question to Marp markdown
+    const questions = [];
+    for (const dir of filteredDirs) {
+      try {
+        const questionDir = path.join(qabankDir, dir);
+        const compiledQuestion = await compileQuestionToMarp(questionDir);
+        questions.push(compiledQuestion);
+      } catch (error) {
+        console.error(`Error compiling question ${dir}:`, error);
+      }
+    }
     
     // Sort questions by ID
     questions.sort((a, b) => a.id - b.id);
     
-    // Group questions in sections of 30
+    // Group questions in sections of SLIDE_BREAKING_CONFIG.QUESTIONS_PER_GROUP
+    const questionsByGroup = {};
+    
     questions.forEach(q => {
-      const groupStart = Math.floor((q.id - 1) / 30) * 30 + 1;
-      const groupEnd = groupStart + 29;
+      const groupStart = Math.floor((q.id - 1) / SLIDE_BREAKING_CONFIG.QUESTIONS_PER_GROUP) * SLIDE_BREAKING_CONFIG.QUESTIONS_PER_GROUP + 1;
+      const groupEnd = groupStart + SLIDE_BREAKING_CONFIG.QUESTIONS_PER_GROUP - 1;
       const groupKey = `${String(groupStart).padStart(3, '0')}-${String(groupEnd).padStart(3, '0')}`;
       
       if (!questionsByGroup[groupKey]) {
@@ -198,41 +242,22 @@ async function compileMarp() {
       questionsByGroup[groupKey].push(q);
     });
     
-    // Generate the final markdown content
-    let finalContent = '';
-    
-    // Read frontmatter content if it exists
-    try {
-      const frontmatterContent = await fs.readFile(frontmatterPath, 'utf-8');
-      finalContent += frontmatterContent + '\n\n';
-    } catch (error) {
-      console.warn('Marp frontmatter file not found or could not be read. Continuing without it.');
-    }
-    
-    for (const [groupKey, groupQuestions] of Object.entries(questionsByGroup)) {
+    // Process each question group
+    for (const [groupKey, groupQuestions] of Object.entries(questionsByGroup).sort()) {
       finalContent += `# Questions ${groupKey}\n\n`;
       
-      const groupQuestionsCount = groupQuestions.length;
-      for (let i = 0; i < groupQuestionsCount; i++) {
-        const question = groupQuestions[i];
+      for (const question of groupQuestions) {
         finalContent += question.content;
-        
-        // Add separator between questions, but not after the last question in a group
-        if (i < groupQuestionsCount - 1) {
-          finalContent += `---\n\n`;
-        }
-      }
-      
-      // Add separator between groups if not the last group
-      const groupKeys = Object.keys(questionsByGroup);
-      const isLastGroup = groupKey === groupKeys[groupKeys.length - 1];
-      if (!isLastGroup) {
-        finalContent += `\n---\n\n`;
       }
     }
     
-    // Write to output file
+    // Write the final content to the output file
+    const outputDir = path.join(projectRoot, 'dist', 'qabank');
+    const outputPath = path.join(outputDir, 'all.md');
+    
+    await fs.mkdir(outputDir, { recursive: true });
     await fs.writeFile(outputPath, finalContent);
+    
     console.log(`Successfully compiled ${questions.length} questions to ${outputPath}`);
   } catch (error) {
     console.error('Error compiling questions to Marp format:', error);
