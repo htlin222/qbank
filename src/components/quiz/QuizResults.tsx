@@ -129,7 +129,8 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                       variant="outline"
                       className={cn(
                         "h-auto py-2 px-3 text-xs font-normal",
-                        buttonStyle
+                        buttonStyle,
+                        showAnswer && isWrong ? "border-red-600 border-2" : ""
                       )}
                       onClick={() => handleQuestionClick(question.id)}
                     >

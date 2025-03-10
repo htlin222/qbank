@@ -46,6 +46,24 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
     const minLength = containsChinese(searchQuery) ? 2 : 3;
     
     if (searchQuery.trim().length >= minLength) {
+      // First check if the search query is a number (potential question ID)
+      const numericQuery = searchQuery.trim().replace(/^0+/, ''); // Remove leading zeros
+      const isNumeric = /^\d+$/.test(numericQuery);
+      
+      if (isNumeric) {
+        // If it's a numeric query, first try to find exact question ID matches
+        const exactMatches = compiledQuestions.filter(q => 
+          String(q.id) === numericQuery || 
+          String(q.id).padStart(3, '0') === searchQuery.trim().padStart(3, '0')
+        );
+        
+        if (exactMatches.length > 0) {
+          setSearchResults(exactMatches);
+          return;
+        }
+      }
+      
+      // If not a numeric query or no exact matches found, perform fuzzy search
       const results = fuse.search(searchQuery);
       setSearchResults(results.map(result => result.item));
     } else {
@@ -184,7 +202,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
                     <Input
-                      placeholder="Search questions, options, or explanations..."
+                      placeholder="Search questions e.g. 012 for question 12, options, or explanations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-8 pr-8"

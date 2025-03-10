@@ -59,12 +59,17 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
                 return (
                   <Dialog key={index}>
                     <DialogTrigger asChild>
-                      <img 
-                        src={figure}
-                        alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                        title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
-                        className="max-w-full h-auto max-h-[50vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                      />
+                      <div className="flex flex-col items-center">
+                        <div className="mb-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {figureName}
+                        </div>
+                        <img 
+                          src={figure}
+                          alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                          title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
+                          className="max-w-full h-auto max-h-[50vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                        />
+                      </div>
                     </DialogTrigger>
                     <DialogContent className="w-[90vw] sm:w-[95vw] max-w-[90vw] max-h-[90vh] overflow-auto p-2 sm:p-6">
                       <DialogHeader className="p-0 sm:p-2">
@@ -156,14 +161,16 @@ export const SingleQuestionWithExplain: React.FC<SingleQuestionWithExplainProps>
                     return (
                       <Dialog key={index}>
                         <DialogTrigger asChild>
-                          <div>
+                          <div className="flex flex-col items-center">
+                            <div className="mb-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {figureName}
+                            </div>
                             <img 
                               src={figure}
                               alt={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                               title={`題號${String(question.id).padStart(3, '0')} - ${figureName}`}
                               className="max-w-full h-auto max-h-[50vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
                             />
-                            <p className="text-center text-xs text-gray-600 mt-1">{figureName}</p>
                           </div>
                         </DialogTrigger>
                         <DialogContent className="w-[90vw] sm:w-[95vw] max-w-[90vw] max-h-[90vh] overflow-auto p-2 sm:p-6">

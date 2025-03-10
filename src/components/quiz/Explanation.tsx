@@ -111,12 +111,17 @@ export const Explanation: React.FC<ExplanationProps> = ({
                 return (
                   <Dialog key={index}>
                     <DialogTrigger asChild>
-                      <img 
-                        src={figure}
-                        alt={figureName}
-                        title={figureName}
-                        className="max-w-full h-auto max-h-[60vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                      />
+                      <div className="flex flex-col items-center">
+                        <div className="mb-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {figureName}
+                        </div>
+                        <img 
+                          src={figure}
+                          alt={figureName}
+                          title={figureName}
+                          className="max-w-full h-auto max-h-[60vh] rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
+                        />
+                      </div>
                     </DialogTrigger>
                     <DialogContent className="w-[92vw] sm:w-[95vw] max-w-[90vw] max-h-[90vh] overflow-auto p-3 sm:p-6">
                       <DialogHeader className="p-0 sm:p-2">
