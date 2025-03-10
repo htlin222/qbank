@@ -113,7 +113,7 @@ async function compileQuestionToMarp(questionDir) {
         .filter(file => !file.startsWith('.')) // Skip hidden files
         .map(file => ({
           name: path.basename(file, path.extname(file)),
-          path: `/qabank/${questionNumber}/explain_figures/${file}`
+          path: `./${questionNumber}/explain_figures/${file}`
         }));
     } catch (error) {
       // No explanation figures or directory doesn't exist, continue without them

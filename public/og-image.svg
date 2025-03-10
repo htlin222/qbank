@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <!-- Background with Material Design primary color -->
+  <rect width="1200" height="630" fill="#3F51B5" />
+
+  <!-- Decorative element - Material Design card-like shadow effect -->
+  <rect x="50" y="50" width="1100" height="530" rx="4" ry="4" fill="#5C6BC0" />
+
+  <!-- Material Design accent color decorative element -->
+  <rect x="50" y="50" width="12" height="530" fill="#FF4081" />
+
+  <!-- Subtle pattern overlay -->
+  <g opacity="0.1">
+    <path d="M0,0 L1200,630" stroke="#FFFFFF" stroke-width="2" />
+    <path d="M0,630 L1200,0" stroke="#FFFFFF" stroke-width="2" />
+  </g>
+
+  <!-- Title text with Material Design typography -->
+  <text x="600" y="315"
+        font-family="Roboto, Arial, sans-serif"
+        font-size="72"
+        font-weight="500"
+        fill="#FFFFFF"
+        text-anchor="middle"
+        dominant-baseline="middle">
+    Oncology Board 113
+  </text>
+
+  <!-- Material Design inspired icons -->
+  <g transform="translate(140, 460)">
+    <circle cx="0" cy="0" r="40" fill="#E91E63" />
+    <path d="M-20,-5 L-5,-5 L-5,-20 L5,-20 L5,-5 L20,-5 L20,5 L5,5 L5,20 L-5,20 L-5,5 L-20,5 Z"
+          fill="#FFFFFF" />
+  </g>
+
+  <!-- Material Design inspired decorative element -->
+  <circle cx="1050" cy="170" r="60" fill="#FF4081" opacity="0.8" />
+  <circle cx="150" cy="170" r="30" fill="#FF4081" opacity="0.6" />
+  <circle cx="1050" cy="460" r="30" fill="#FF4081" opacity="0.6" />
+
+  <!-- Subtle Material Design elevation shadow effect -->
+  <rect x="50" y="50" width="1100" height="530" rx="4" ry="4"
+        fill="none"
+        stroke="#000000"
+        stroke-width="1"
+        opacity="0.1" />
+</svg>
