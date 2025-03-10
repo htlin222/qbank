@@ -38,6 +38,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
   mode
 }) => {
   const [selectedQuestion, setSelectedQuestion] = useState<number | null>(null);
+  const [viewedQuestions, setViewedQuestions] = useState<Set<number>>(new Set());
   
   // Calculate scores according to quiz mode:
   // Study Mode: Show raw score and percentage immediately
@@ -68,6 +69,11 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
 
   const handleQuestionClick = (questionId: number) => {
     setSelectedQuestion(questionId);
+    setViewedQuestions(prev => {
+      const newSet = new Set(prev);
+      newSet.add(questionId);
+      return newSet;
+    });
   };
 
   const currentQuestion = selectedQuestion !== null 
@@ -76,6 +82,16 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto p-4">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes pulse-scale {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+        .pulse-animation {
+          animation: pulse-scale 1.5s infinite ease-in-out;
+        }
+      `}} />
       <Card className="w-full">
         <CardHeader className="bg-blue-600 text-white">
           <CardTitle className="text-2xl flex justify-between items-center">
@@ -115,6 +131,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                   const correctAnswer = numberToLetter(question.correctAnswer);
                   const isWrong = userAnswers[question.id] !== question.correctAnswer;
                   const questionId = String(question.id).padStart(3, '0');
+                  const isViewed = viewedQuestions.has(question.id);
                   
                   // In test mode, only show answers after completion
                   const showAnswer = mode === 'study' || showResults;
@@ -122,6 +139,9 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                   const buttonStyle = !showAnswer
                     ? isAnswered ? "text-blue-600" : ""
                     : isWrong ? "text-red-600" : "text-green-600";
+                  
+                  // Apply animation only to wrong answers that haven't been viewed
+                  const shouldAnimate = showAnswer && isWrong && !isViewed;
                     
                   return (
                     <Button
@@ -130,7 +150,8 @@ export const QuizResults: React.FC<QuizResultsProps> = ({
                       className={cn(
                         "h-auto py-2 px-3 text-xs font-normal",
                         buttonStyle,
-                        showAnswer && isWrong ? "border-red-600 border-2" : ""
+                        showAnswer && isWrong ? "border-red-600 border-2" : "",
+                        shouldAnimate ? "pulse-animation" : ""
                       )}
                       onClick={() => handleQuestionClick(question.id)}
                     >
