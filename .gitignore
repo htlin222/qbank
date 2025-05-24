@@ -29,3 +29,6 @@ dist-ssr
 .netlify
 
 public/qabank/
+
+
+src/data/compiledQuestions.json
