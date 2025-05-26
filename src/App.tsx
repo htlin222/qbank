@@ -9,6 +9,7 @@ import { Timer } from '@/components/quiz/Timer';
 import { SkipForward, Upload } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import compiledQuestions from '@/data/compiledQuestions.json';
+import config from '@/config';
 
 type QuestionStatus = 'unread' | 'answered' | 'skipped';
 type QuizMode = 'study' | 'test';
@@ -345,7 +346,7 @@ const OncoQuiz = () => {
       <div className="mb-8 space-y-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-bold text-blue-800">113年度腫專考古題</h1>
+            <h1 className="text-2xl font-bold text-blue-800">{config.appTitle}</h1>
             <div className="flex gap-4">
               <QuizOverview
                 questions={compiledQuestions.map(q => ({

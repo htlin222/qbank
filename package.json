@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "node scripts/compileQuestions.js && tsc -b && vite build && node scripts/compileMarp.js",
+		"build": "node -r dotenv/config scripts/compileQuestions.js && tsc -b && vite build && node -r dotenv/config scripts/compileMarp.js",
+		"build:custom": "APP_TITLE=$npm_config_title VITE_APP_TITLE=$npm_config_title node -r dotenv/config scripts/compileQuestions.js && tsc -b && VITE_APP_TITLE=$npm_config_title vite build && APP_TITLE=$npm_config_title node -r dotenv/config scripts/compileMarp.js",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
@@ -42,6 +43,7 @@
 		"clsx": "^2.1.1",
 		"cmdk": "^1.0.0",
 		"date-fns": "^3.6.0",
+		"dotenv": "^16.5.0",
 		"embla-carousel-react": "^8.1.6",
 		"fuse.js": "^7.1.0",
 		"input-otp": "^1.2.4",

@@ -1,6 +1,10 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +27,8 @@ const SLIDE_BREAKING_CONFIG = {
 
 // Document configuration
 const DOCUMENT_CONFIG = {
-  // Title for the document
-  TITLE: "113年腫專考古題詳解"
+  // Title for the document - uses the APP_TITLE from .env file
+  TITLE: process.env.APP_TITLE
 };
 
 async function readTextFile(filePath) {

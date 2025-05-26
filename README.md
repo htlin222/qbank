@@ -109,8 +109,37 @@ pnpm preview
 ### Development Scripts
 - `pnpm dev` - Start development server with hot reload
 - `pnpm build` - Compile questions and build for production
+- `pnpm build:custom --title="Custom Title"` - Build with a custom application title
 - `pnpm lint` - Run ESLint for TypeScript/TSX files
 - `pnpm preview` - Preview the production build locally
+
+### Configuration
+
+The application uses environment variables for configuration. These can be set in the `.env` file or passed as command-line arguments during build.
+
+#### Available Configuration Options
+
+| Variable | Description | Default Value |
+|----------|-------------|---------------|
+| `VITE_APP_TITLE` | The title displayed in the web application | `113年度腫專考古題` |
+| `APP_TITLE` | The title used in the Marp document | `113年腫專考古題詳解` |
+
+#### Customizing the Title
+
+You can customize the application title in three ways:
+
+1. **Edit the `.env` file**:
+   ```
+   VITE_APP_TITLE=114年度腫專考古題
+   APP_TITLE=114年腫專考古題詳解
+   ```
+
+2. **Use the custom build command**:
+   ```bash
+   pnpm build:custom --title="114年度腫專考古題"
+   ```
+
+3. **Create environment-specific `.env` files** (e.g., `.env.production`, `.env.staging`)
 
 ### Tech Stack
 - React 18

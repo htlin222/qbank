@@ -11,6 +11,7 @@ import compiledQuestions from '@/data/compiledQuestions.json';
 import Fuse from 'fuse.js';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import config from '@/config';
 
 interface WelcomePageProps {
   onStart: (mode: 'study' | 'test') => void;
@@ -112,7 +113,7 @@ export const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
     <div className="max-w-3xl mx-auto">
       <Card className="w-full">
         <CardHeader className="bg-blue-600 text-white text-center pb-6">
-          <CardTitle className="text-3xl">113年度腫專考古題</CardTitle>
+          <CardTitle className="text-3xl">{config.appTitle}</CardTitle>
         </CardHeader>
         <CardContent className="pt-6 pb-4">
           {!isAuthenticated ? (
