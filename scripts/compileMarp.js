@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { createHash } from 'crypto';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -113,14 +114,57 @@ async function compileQuestionToMarp(questionDir) {
     let explainFigures = [];
     try {
       const explainFigureFiles = await fs.readdir(explainFiguresDir);
-      explainFigures = explainFigureFiles
+      
+      // Process each figure file - rename if needed and update paths
+      explainFigures = await Promise.all(explainFigureFiles
         .filter(file => !file.startsWith('.')) // Skip hidden files
-        .map(file => ({
-          name: path.basename(file, path.extname(file)),
-          path: `./${questionNumber}/explain_figures/${file}`
+        .map(async file => {
+          const fileExt = path.extname(file);
+          const baseName = path.basename(file, fileExt);
+          const originalPath = path.join(explainFiguresDir, file);
+          
+          // Create a sanitized filename by replacing spaces with underscores
+          // and removing any other problematic characters
+          let sanitizedName = baseName
+            .replace(/\s+/g, '_') // Replace spaces with underscores
+            .replace(/[^a-zA-Z0-9_\-\.]/g, '') // Remove any other non-alphanumeric chars except underscores, hyphens, and dots
+            .trim();
+          
+          // If the name would be empty after sanitization, create a hash-based name
+          if (!sanitizedName) {
+            const hash = createHash('md5').update(baseName).digest('hex').substring(0, 8);
+            sanitizedName = `image_${hash}`;
+          }
+          
+          // Only rename if the sanitized name is different from the original
+          const newFileName = `${sanitizedName}${fileExt}`;
+          const newPath = path.join(explainFiguresDir, newFileName);
+          
+          // Rename the file if the name has changed
+          if (file !== newFileName) {
+            try {
+              await fs.rename(originalPath, newPath);
+              console.log(`Renamed: ${file} -> ${newFileName}`);
+            } catch (renameError) {
+              console.error(`Error renaming file ${file}:`, renameError);
+              // If rename fails, use the original file
+              return {
+                name: baseName,
+                originalName: baseName,
+                path: `./${questionNumber}/explain_figures/${file}`
+              };
+            }
+          }
+          
+          return {
+            name: sanitizedName,
+            originalName: baseName,
+            path: `./${questionNumber}/explain_figures/${newFileName}`
+          };
         }));
     } catch (error) {
       // No explanation figures or directory doesn't exist, continue without them
+      console.error(`Error processing explain_figures for question ${questionNumber}:`, error);
     }
     
     // Format the question in Marp markdown format
@@ -155,7 +199,9 @@ async function compileQuestionToMarp(questionDir) {
     // Add figures if there are any, each on its own slide
     for (let i = 0; i < explainFigures.length; i++) {
       const figure = explainFigures[i];
-      marpContent += `---\n\n![w:1150px h:650px](${figure.path})\n\n> ${figure.name}\n\n`;
+      // Use the original name for display but sanitized path for the image reference
+      const displayName = figure.originalName || figure.name;
+      marpContent += `---\n\n![w:1150px h:650px](${figure.path})\n\n> ${displayName}\n\n`;
     }
     
     return {
