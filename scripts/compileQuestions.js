@@ -60,6 +60,10 @@ async function compileQuestions() {
   const outputPath = path.join(projectRoot, 'src/data/compiledQuestions.json');
 
   try {
+    // Ensure output directory exists
+    const outputDir = path.dirname(outputPath);
+    await fs.mkdir(outputDir, { recursive: true });
+
     // Get all question directories
     const dirs = await fs.readdir(qabankPath);
     const questionDirs = dirs
